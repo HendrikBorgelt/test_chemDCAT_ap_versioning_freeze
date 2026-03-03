@@ -1,1 +1,3 @@
 This is mearly a test implementation of the repo found [here](https://github.com/nfdi-de/chem-dcat-ap), which is intended as a testground for checking whether we can freeze schema versions of our LinkML schema.
+
+test pages: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/
