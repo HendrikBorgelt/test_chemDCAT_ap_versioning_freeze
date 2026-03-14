@@ -27,7 +27,7 @@ jobs:
     steps:
       # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # otherwise, you will fail to push refs to dest repo
 
@@ -40,7 +40,7 @@ jobs:
 
       # https://github.com/astral-sh/setup-uv
       - name: Install uv
-        uses: astral-sh/setup-uv@v7.3.1
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: 3.13
           enable-cache: true
@@ -48,7 +48,7 @@ jobs:
 
       # https://github.com/actions/setup-python
       - name: Set up Python
-        uses: actions/setup-python@v6.2.0
+        uses: actions/setup-python@v5
         with:
           python-version: 3.13
 
@@ -75,7 +75,7 @@ jobs:
             --schema-dir src/chem_dcat_ap/schema \
             --prefix dcatapplus \
             --from-alias latest \
-            --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json
+            --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json
 
       - name: Generate schema documentation
         run: |
@@ -117,7 +117,7 @@ jobs:
           # Check whether to also promote the 'latest' alias
           SHOULD_UPDATE=$(uv run python scripts/should_update_latest.py \
             --new-version ${{ github.ref_name }} \
-            --versions-url https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/versions.json \
+            --versions-url https://nfdi-de.github.io/chem-dcat-ap/versions.json \
             2>/dev/null || echo "true")
 
           echo "Promote 'latest' alias: ${SHOULD_UPDATE}"
