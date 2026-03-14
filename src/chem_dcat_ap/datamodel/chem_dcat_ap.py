@@ -2,7 +2,7 @@
 # Generation date: 2026-02-27T09:42:25
 # Schema: chem-dcat-ap
 #
-# id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
+# id: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
 # description: This is an extension of the DCAT Application Profile PLUS LinkML schema. It is intended to be used by NFDI4Chem & NFDI4Cat as a core that can further be extended in profiles/schemas to provide chemistry specific specific metadata for a dataset.
 # license: CC-BY 4.0
 
@@ -90,12 +90,12 @@ T4FS = CurieNamespace('T4FS', 'http://purl.obolibrary.org/obo/T4FS_')
 VOC4CAT = CurieNamespace('VOC4CAT', 'https://w3id.org/nfdi4cat/voc4cat_')
 ADMS = CurieNamespace('adms', 'http://www.w3.org/ns/adms#')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
-CHEMDCATAP = CurieNamespace('chemdcatap', 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/')
-CHEMICAL_ENTITIES_AP = CurieNamespace('chemical_entities_ap', 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/')
+CHEMDCATAP = CurieNamespace('chemdcatap', 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/')
+CHEMICAL_ENTITIES_AP = CurieNamespace('chemical_entities_ap', 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
 DCATAP = CurieNamespace('dcatap', 'http://data.europa.eu/r5r/')
-DCATAP_PLUS = CurieNamespace('dcatap_plus', 'https://w3id.org/nfdi-de/dcat-ap-plus/')
-DCATAPPLUS = CurieNamespace('dcatapplus', 'https://w3id.org/nfdi-de/dcat-ap-plus/')
+DCATAP_PLUS = CurieNamespace('dcatap_plus', 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/')
+DCATAPPLUS = CurieNamespace('dcatapplus', 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/')
 DCTERMS = CurieNamespace('dcterms', 'http://purl.org/dc/terms/')
 DOI = CurieNamespace('doi', 'https://doi.org/')
 ELI = CurieNamespace('eli', 'http://data.europa.eu/eli/ontology#')
@@ -104,7 +104,7 @@ EX = CurieNamespace('ex', 'http://example.org/')
 FOAF = CurieNamespace('foaf', 'http://xmlns.com/foaf/0.1/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 LOCN = CurieNamespace('locn', 'http://www.w3.org/ns/locn#')
-MATERIAL_ENTITIES_AP = CurieNamespace('material_entities_ap', 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/')
+MATERIAL_ENTITIES_AP = CurieNamespace('material_entities_ap', 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/')
 ODRL = CurieNamespace('odrl', 'http://www.w3.org/ns/odrl/2/')
 OWL = CurieNamespace('owl', 'http://www.w3.org/2002/07/owl#')
 PROV = CurieNamespace('prov', 'http://www.w3.org/ns/prov#')

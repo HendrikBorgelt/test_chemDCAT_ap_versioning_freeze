@@ -7737,7 +7737,7 @@
             "type": "object"
         }
     },
-    "$id": "https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/",
+    "$id": "https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/",
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "additionalProperties": true,
     "metamodel_version": "1.7.0",

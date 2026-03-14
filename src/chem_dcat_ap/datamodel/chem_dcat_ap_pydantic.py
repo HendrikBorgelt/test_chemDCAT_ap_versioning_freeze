@@ -85,7 +85,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'chemdcatap',
                     'NFDI4Cat as a core that can further be extended in '
                     'profiles/schemas to provide chemistry specific specific '
                     'metadata for a dataset.',
-     'id': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/',
+     'id': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/',
      'imports': ['linkml:types',
                  'dcatapplus:latest/schema/dcat_ap_plus',
                  'chemical_entities_ap',
@@ -143,11 +143,11 @@ linkml_meta = LinkMLMeta({'default_prefix': 'chemdcatap',
                   'biolink': {'prefix_prefix': 'biolink',
                               'prefix_reference': 'https://w3id.org/biolink/vocab/'},
                   'chemdcatap': {'prefix_prefix': 'chemdcatap',
-                                 'prefix_reference': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/'},
+                                 'prefix_reference': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/'},
                   'dcat': {'prefix_prefix': 'dcat',
                            'prefix_reference': 'http://www.w3.org/ns/dcat#'},
                   'dcatapplus': {'prefix_prefix': 'dcatapplus',
-                                 'prefix_reference': 'https://w3id.org/nfdi-de/dcat-ap-plus/'},
+                                 'prefix_reference': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'},
                   'dcterms': {'prefix_prefix': 'dcterms',
                               'prefix_reference': 'http://purl.org/dc/terms/'},
                   'doi': {'prefix_prefix': 'doi',
@@ -296,7 +296,7 @@ class Agent(ConfiguredBaseModel):
     See [DCAT-AP specs:Agent](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Agent)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'foaf:Agent',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'name': {'description': 'A name of the agent.',
                                  'inlined_as_list': True,
                                  'multivalued': True,
@@ -324,7 +324,7 @@ class Catalogue(ConfiguredBaseModel):
     See [DCAT-AP specs:Catalogue](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Catalogue)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Catalog',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'applicable_legislation': {'description': 'The legislation '
                                                                   'that mandates the '
                                                                   'creation or '
@@ -614,7 +614,7 @@ class CatalogueRecord(ConfiguredBaseModel):
     See [DCAT-AP specs:CatalogueRecord](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#CatalogueRecord)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:CatalogRecord',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'application_profile': {'description': 'An Application Profile '
                                                                'that the Catalogued '
                                                                'Resource&#39;s '
@@ -817,7 +817,7 @@ class Checksum(ConfiguredBaseModel):
     See [DCAT-AP specs:Checksum](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Checksum)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'spdx:Checksum',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'algorithm': {'description': 'The algorithm used to produce '
                                                      'the subject Checksum.',
                                       'inlined_as_list': True,
@@ -846,7 +846,7 @@ class ClassifierMixin(ConfiguredBaseModel):
     A mixin with which an entity of this schema can be classified via an additional rdf:type or dcterms:type assertion.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'abstract': True,
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixin': True,
          'slot_usage': {'type': {'inlined': True,
@@ -866,7 +866,7 @@ class Activity(ClassifierMixin):
     See [DCAT-AP specs:Activity](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Activity)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Activity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin'],
          'notes': ['The specified properties (slots) of this class are part of our '
@@ -1059,7 +1059,7 @@ class AgenticEntity(ClassifierMixin):
     An entity that is somehow responsible for an Activity to take place.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Agent',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin'],
          'slot_usage': {'has_part': {'description': 'The slot to specify parts of an '
@@ -1202,7 +1202,7 @@ class DataGeneratingActivity(Activity):
     An Activity (process) that has the objective to produce information (in form of a dataset) about another Activity or Entity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Activity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core']})
 
     evaluated_entity: Optional[list[EvaluatedEntity]] = Field(default=[], description="""The slot to specify the Entity about which the DataGeneratingActivity produced information.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DataGeneratingActivity'],
@@ -1364,7 +1364,7 @@ class DataAnalysis(DataGeneratingActivity):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Activity',
          'close_mappings': ['NCIT:C25391'],
          'exact_mappings': ['OBI:0200000'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'evaluated_entity': {'description': 'A slot to provide the '
                                                             'data that was analysed by '
@@ -1531,7 +1531,7 @@ class DataService(ConfiguredBaseModel):
     See [DCAT-AP specs:DataService](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#DataService)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:DataService',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'access_rights': {'description': 'Information regarding access '
                                                          'or restrictions based on '
                                                          'privacy, security, or other '
@@ -1795,7 +1795,7 @@ class Dataset(ConfiguredBaseModel):
     A collection of data, published or curated by a single agent, and available for access or download in one or more representations.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Dataset',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'access_rights': {'description': 'Information that indicates '
                                                          'whether the Dataset is '
@@ -2282,7 +2282,7 @@ class AnalysisDataset(Dataset):
     A Dataset that was generated by an analysis of some previously generated data. For example, a dataset that contains the data of an assignment of a chemical structure to a sample based on the spectral data obtained from the sample is an AnalyticalDataset.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Dataset',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'was_generated_by': {'inlined_as_list': True,
                                              'multivalued': True,
@@ -2454,7 +2454,7 @@ class DatasetSeries(ConfiguredBaseModel):
     See [DCAT-AP specs:DatasetSeries](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#DatasetSeries)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:DatasetSeries',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'applicable_legislation': {'description': 'The legislation '
                                                                   'that mandates the '
                                                                   'creation or '
@@ -2650,7 +2650,7 @@ class DefinedTerm(ConfiguredBaseModel):
     A word, name, acronym or phrase that is defined in a controlled vocabulary (CV) and that is used to provide an additional rdf:type or dcterms:type of a class within this schema.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'schema:DefinedTerm',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'title': {'name': 'title', 'slot_uri': 'schema:name'}}})
 
@@ -2716,7 +2716,7 @@ class Device(AgenticEntity):
                             'http://purl.obolibrary.org/obo/NCIT_C62103',
                             'http://semanticscience.org/resource/SIO_000956',
                             'http://purl.allotrope.org/ontologies/equipment#AFE_0000354'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'has_part': {'description': 'The slot to specify parts of a '
                                                     'Device that are themselves '
@@ -2850,7 +2850,7 @@ class Distribution(ConfiguredBaseModel):
     See [DCAT-AP specs:Distribution](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Distribution)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Distribution',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'access_URL': {'description': 'A URL that gives access to a '
                                                       'Distribution of the Dataset.',
                                        'inlined_as_list': True,
@@ -3199,7 +3199,7 @@ class Entity(ClassifierMixin):
     A physical, digital, conceptual, or other kind of thing with some fixed aspects; entities may be real or imaginary.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Entity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin'],
          'slot_usage': {'description': {'description': 'The slot to provide a '
@@ -3345,7 +3345,7 @@ class EvaluatedActivity(Activity):
     An activity or process that is being evaluated in a DataGeneratingActivity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Activity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'other_identifier': {'description': 'A slot to provide a '
                                                             'secondary identifier of '
@@ -3497,7 +3497,7 @@ class EvaluatedEntity(Entity):
     An Entity that is being evaluated in a DataGeneratingActivity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Entity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'description': {'description': 'The slot to provide a '
                                                        'description for the '
@@ -3638,7 +3638,7 @@ class AnalysisSourceData(EvaluatedEntity):
     Information that was evaluated within a DataAnalysis.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Entity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'was_generated_by': {'description': 'A slot to provide the '
                                                             'Activity which created '
@@ -3764,7 +3764,7 @@ class Kind(ConfiguredBaseModel):
     See [DCAT-AP specs:Kind](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Kind)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'vcard:Kind',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     pass
 
@@ -3774,7 +3774,7 @@ class Location(ConfiguredBaseModel):
     See [DCAT-AP specs:Location](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Location)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:Location',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'bbox': {'description': 'The geographic bounding box of a '
                                                 'resource.',
                                  'inlined_as_list': False,
@@ -3818,7 +3818,7 @@ class Plan(ClassifierMixin):
                                       'settings: pulse sequence: zgpg30, temperature: '
                                       '298.0 K, number of scans: 1024, Solvent : '
                                       'chloroform-D1 (CDCl3).'}],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin']})
 
@@ -3910,7 +3910,7 @@ class QualitativeAttribute(ClassifierMixin):
     A piece of information that is attributed to an Entity, Activity or AgenticEntity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Entity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin'],
          'slot_usage': {'value': {'description': 'The slot to provide the literal '
@@ -4009,7 +4009,7 @@ class QuantitativeAttribute(ClassifierMixin):
     A quantifiable piece of information that is attributed to an Entity, Activity or AgenticEntity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin'],
          'slot_usage': {'value': {'description': 'The slot to provide the literal '
@@ -4125,7 +4125,7 @@ class Relationship(ConfiguredBaseModel):
     See [DCAT-AP specs:Relationship](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Relationship)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Relationship',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'had_role': {'description': 'A function of an entity or agent '
                                                     'with respect to another entity or '
                                                     'resource.',
@@ -4154,7 +4154,7 @@ class Software(AgenticEntity):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:SoftwareAgent',
          'exact_mappings': ['schema:SoftwareApplication'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'slot_usage': {'has_part': {'description': 'The slot to specify parts of a '
                                                     'Software that are themselves '
@@ -4287,7 +4287,7 @@ class SupportiveEntity(ConfiguredBaseModel):
     """
     The supportive entities are supporting the main entities in the Application Profile. They are included in the Application Profile because they form the range of properties.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4371,7 +4371,7 @@ class Attribution(SupportiveEntity):
     See [DCAT-AP specs:Attribution](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Attribution)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Attribution',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4455,7 +4455,7 @@ class ChecksumAlgorithm(SupportiveEntity):
     See [DCAT-AP specs:ChecksumAlgorithm](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ChecksumAlgorithm)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'spdx:ChecksumAlgorithm',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4539,7 +4539,7 @@ class Concept(SupportiveEntity):
     See [DCAT-AP specs:Concept](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Concept)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'skos:Concept',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'preferred_label': {'description': 'A preferred label of the '
                                                            'concept.',
                                             'inlined_as_list': True,
@@ -4632,7 +4632,7 @@ class ConceptScheme(SupportiveEntity):
     See [DCAT-AP specs:ConceptScheme](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ConceptScheme)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'skos:ConceptScheme',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'title': {'description': 'A name of the concept scheme.',
                                   'inlined_as_list': True,
                                   'multivalued': True,
@@ -4723,7 +4723,7 @@ class Document(SupportiveEntity):
     See [DCAT-AP specs:Document](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Document)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'foaf:Document',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     id: str = Field(default=..., description="""A slot to provide an URI for an entity within this schema.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4817,7 +4817,7 @@ class Frequency(SupportiveEntity):
     See [DCAT-AP specs:Frequency](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Frequency)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:Frequency',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4901,7 +4901,7 @@ class Geometry(SupportiveEntity):
     See [DCAT-AP specs:Geometry](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Geometry)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'locn:Geometry',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -4985,7 +4985,7 @@ class Identifier(SupportiveEntity):
     See [DCAT-AP specs:Identifier](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Identifier)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'adms:Identifier',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'notation': {'description': 'A string that is an identifier in '
                                                     'the context of the identifier '
                                                     'scheme referenced by its '
@@ -5080,7 +5080,7 @@ class LegalResource(SupportiveEntity):
     See [DCAT-AP specs:LegalResource](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LegalResource)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'eli:LegalResource',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     id: str = Field(default=..., description="""A slot to provide an URI for an entity within this schema.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5174,7 +5174,7 @@ class LicenseDocument(SupportiveEntity):
     See [DCAT-AP specs:LicenseDocument](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LicenseDocument)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:LicenseDocument',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'type': {'description': 'A type of licence, e.g. indicating '
                                                 "'public domain' or 'royalties "
                                                 "required'.",
@@ -5281,7 +5281,7 @@ class LinguisticSystem(SupportiveEntity):
     See [DCAT-AP specs:LinguisticSystem](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LinguisticSystem)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:LinguisticSystem',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5365,7 +5365,7 @@ class MediaType(SupportiveEntity):
     See [DCAT-AP specs:MediaType](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#MediaType)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:MediaType',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5449,7 +5449,7 @@ class MediaTypeOrExtent(SupportiveEntity):
     See [DCAT-AP specs:MediaTypeOrExtent](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#MediaTypeOrExtent)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:MediaTypeOrExtent',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5533,7 +5533,7 @@ class PeriodOfTime(SupportiveEntity):
     See [DCAT-AP specs:PeriodOfTime](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#PeriodOfTime)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:PeriodOfTime',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'slot_usage': {'beginning': {'description': 'The beginning of a period or '
                                                      'interval.',
                                       'inlined_as_list': True,
@@ -5654,7 +5654,7 @@ class Policy(SupportiveEntity):
     See [DCAT-AP specs:Policy](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Policy)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'odrl:Policy',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5738,7 +5738,7 @@ class ProvenanceStatement(SupportiveEntity):
     See [DCAT-AP specs:ProvenanceStatement](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ProvenanceStatement)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:ProvenanceStatement',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5822,7 +5822,7 @@ class Resource(SupportiveEntity):
     See [DCAT-AP specs:Resource](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Resource)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'rdfs:Resource',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     id: str = Field(default=..., description="""A slot to provide an URI for an entity within this schema.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -5916,7 +5916,7 @@ class RightsStatement(SupportiveEntity):
     See [DCAT-AP specs:RightsStatement](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#RightsStatement)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:RightsStatement',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6000,7 +6000,7 @@ class Role(SupportiveEntity):
     See [DCAT-AP specs:Role](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Role)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcat:Role',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6084,7 +6084,7 @@ class Standard(SupportiveEntity):
     See [DCAT-AP specs:Standard](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Standard)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'dcterms:Standard',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6168,7 +6168,7 @@ class Surrounding(ClassifierMixin):
     The surrounding in which the dataset creating activity took place (e.g. a lab).
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Location',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/',
          'in_subset': ['domain_agnostic_core'],
          'mixins': ['ClassifierMixin']})
 
@@ -6260,7 +6260,7 @@ class TimeInstant(SupportiveEntity):
     See [DCAT-AP specs:TimeInstant](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#TimeInstant)
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'time:Instant',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_dcat_ap_plus_versioning_freeze/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6341,7 +6341,7 @@ class TimeInstant(SupportiveEntity):
 
 class InChIKey(QualitativeAttribute):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEMINF:000059',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6434,7 +6434,7 @@ class InChi(QualitativeAttribute):
     A structure descriptor which conforms to the InChI format specification.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEMINF:000113',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6527,7 +6527,7 @@ class MolecularFormula(QualitativeAttribute):
     A structure descriptor which identifies each constituent element by its chemical symbol and indicates the number of atoms of each element found in each discrete molecule of that compound.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEMINF:000042',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6620,7 +6620,7 @@ class IUPACName(QualitativeAttribute):
     A systematic name which is formulated according to the rules and recommendations for chemical nomenclature set out by the International Union of Pure and Applied Chemistry (IUPAC).
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEMINF:000107',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6713,7 +6713,7 @@ class SMILES(QualitativeAttribute):
     A structure descriptor that denotes a molecular structure as a graph and conforms to the SMILES format specification.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEMINF:000018',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -6811,7 +6811,7 @@ class Concentration(QuantitativeAttribute):
                             'NCIT:C41185',
                             'VOC4CAT:0007244',
                             'AFR:0002036'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/',
          'narrow_mappings': ['CHMO:0002822']})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
@@ -6923,7 +6923,7 @@ class AmountOfSubstance(QuantitativeAttribute):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'aliases': ['SubstanceAmount'],
          'class_uri': 'qudt:Quantity',
          'close_mappings': ['PATO:0000070'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -7031,7 +7031,7 @@ class PHValue(QuantitativeAttribute):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:001089',
          'close_mappings': ['PATO:0001842'],
          'exact_mappings': ['NCIT:C45997', 'AFR:0001142'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -7140,7 +7140,7 @@ class MaterialisticMixin(ConfiguredBaseModel):
     A LinkML mixin used to pass down properties common to all material entities. It is needed for example to have MaterialSample have the same properties as MaterialEntity, although it is defined as a subclass of EvaluatedEntity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'abstract': True,
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/',
          'mixin': True})
 
     alternative_label: Optional[str] = Field(default=None, description="""The slot to specify an alternative label, name or title for a MaterialEntity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['MaterialisticMixin'],
@@ -7180,7 +7180,7 @@ class ChemicalSubstanceMixin(MaterialisticMixin):
     A LinkML mixin used to pass down properties common to all material entities that are described in a chemical context via being composed of chemical entities (e.g. atom, molecule, ion, ion pair, radical, complex, conformer etc., ) of the same type or of different types.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'abstract': True,
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/',
          'mixin': True})
 
     has_concentration: Optional[list[Concentration]] = Field(default=[], description="""The slot to provide the Concentration of a ChemicalSubstance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin'],
@@ -7248,7 +7248,7 @@ class PolymerMixin(ChemicalSubstanceMixin):
     A LinkML mixin used to pass down properties common to all chemical substances that are composed of macromolecules of different kinds and which may be differentiated by composition, length, degree of branching etc..
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'abstract': True,
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/',
          'mixin': True})
 
     has_concentration: Optional[list[Concentration]] = Field(default=[], description="""The slot to provide the Concentration of a ChemicalSubstance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin'],
@@ -7316,7 +7316,7 @@ class MaterialEntity(MaterialisticMixin, Entity):
     A material is an Entity that has some portion of matter as proper part.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'BFO:0000040',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/',
          'mixins': ['MaterialisticMixin'],
          'slot_usage': {'has_part': {'description': 'The slot to provide the parts of '
                                                     'a MaterialEntity.',
@@ -7473,7 +7473,7 @@ class ChemicalEntity(MaterialEntity):
     Any constitutionally or isotopically distinct atom, molecule, ion, ion pair, radical, radical ion, complex, conformer etc., identifiable as a separately distinguishable entity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEBI:23367',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     inchi: Optional[list[InChi]] = Field(default=[], description="""The slot to provide the InChi descriptor of a ChemicalEntity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalEntity'],
          'is_a': 'has_qualitative_attribute',
@@ -7645,7 +7645,7 @@ class Atom(ChemicalEntity):
     A MaterialEntity constituting the smallest component of an element having the chemical properties of the element.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'CHEBI:33250',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/',
          'slot_usage': {'rdf_type': {'description': 'The slot to provide the Atom as a '
                                                     'ChEBI ID from the atom '
                                                     '(CHEBI:33250) branch.',
@@ -7823,7 +7823,7 @@ class MaterialSample(MaterialisticMixin, EvaluatedEntity):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'OBI:0000747',
          'exact_mappings': ['SIO:001050', 'VOC4CAT:0005056'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/',
          'mixins': ['MaterialisticMixin'],
          'slot_usage': {'derived_from': {'description': 'The slot to specify the '
                                                         'MaterialEntity or '
@@ -7982,7 +7982,7 @@ class Temperature(QuantitativeAttribute):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
          'close_mappings': ['PATO:0000146'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8092,7 +8092,7 @@ class Mass(QuantitativeAttribute):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
          'close_mappings': ['PATO:0000125'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8202,7 +8202,7 @@ class MolarMass(Mass):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'AFR:0002409',
          'close_mappings': ['PATO:0001681'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8312,7 +8312,7 @@ class Volume(QuantitativeAttribute):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
          'close_mappings': ['PATO:0000918'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8422,7 +8422,7 @@ class Density(QuantitativeAttribute):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:001406',
          'close_mappings': ['PATO:0001019'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8529,7 +8529,7 @@ class Density(QuantitativeAttribute):
 class Pressure(QuantitativeAttribute):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
          'close_mappings': ['PATO:0001025'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/materials/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -8639,7 +8639,7 @@ class ChemicalReaction(EvaluatedActivity):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:010345',
          'exact_mappings': ['MOP:0000543', 'REX:0000002', 'AFP:0003711'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'narrow_mappings': ['RXNO:0000329'],
          'slot_usage': {'has_pressure': {'description': 'The slot to specify the '
                                                         'Pressure at which a '
@@ -8842,7 +8842,7 @@ class StartingMaterial(MaterialEntity, ChemicalSubstanceMixin):
     A ChemicalSubstance with that has a starting material role in a synthesis.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'PROCO:0000029',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['ChemicalSubstanceMixin']})
 
     has_molar_equivalent: Optional[list[MolarEquivalent]] = Field(default=[], description="""A slot to provide the MolarEquivalent of a ChemicalSubstance, such as the DissolvingSubstance, Starting Material or Reactant, within the context of a chemical reaction.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin',
@@ -9021,7 +9021,7 @@ class DissolvingSubstance(ChemicalSubstanceMixin, MaterialisticMixin, AgenticEnt
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'aliases': ['solvent'],
          'class_uri': 'SIO:010417',
          'exact_mappings': ['VOC4CAT:0007246', 'NCIT:C45790'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['ChemicalSubstanceMixin', 'MaterialisticMixin']})
 
     has_percentage_of_total: Optional[list[PercentageOfTotal]] = Field(default=[], description="""A slot to specify the percentage of a specific ChemicalSubstance in relation to the total amount of that same substance used across a multi-step reaction.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin', 'DissolvingSubstance'],
@@ -9199,7 +9199,7 @@ class Reagent(MaterialEntity, ChemicalSubstanceMixin):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:010411',
          'close_mappings': ['OBI:0001879', 'PROCO:0000029'],
          'exact_mappings': ['NCIT:C802', 'VOC4CAT:0000101'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['ChemicalSubstanceMixin']})
 
     has_molar_equivalent: Optional[list[MolarEquivalent]] = Field(default=[], description="""A slot to provide the MolarEquivalent of a ChemicalSubstance, such as the DissolvingSubstance, Starting Material or Reactant, within the context of a chemical reaction.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin',
@@ -9378,7 +9378,7 @@ class ChemicalProduct(MaterialEntity, ChemicalSubstanceMixin):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'NCIT:C48810',
          'close_mappings': ['ENVO:2000000'],
          'exact_mappings': ['VOC4CAT:0000194'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['ChemicalSubstanceMixin']})
 
     has_concentration: Optional[list[Concentration]] = Field(default=[], description="""The slot to provide the Concentration of a ChemicalSubstance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin'],
@@ -9557,7 +9557,7 @@ class Catalyst(ChemicalSubstanceMixin, AgenticEntity):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:010344',
          'close_mappings': ['CHEBI:35223'],
          'exact_mappings': ['VOC4CAT:0000194', 'NCIT:C48810'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['ChemicalSubstanceMixin']})
 
     has_molar_equivalent: Optional[list[MolarEquivalent]] = Field(default=[], description="""A slot to provide the MolarEquivalent of a ChemicalSubstance, such as the DissolvingSubstance, Starting Material or Reactant, within the context of a chemical reaction.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin',
@@ -9734,7 +9734,7 @@ class Reactor(MaterialisticMixin, Device):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'AFE:0000153',
          'exact_mappings': ['VOC4CAT:0007017'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/',
          'mixins': ['MaterialisticMixin']})
 
     alternative_label: Optional[str] = Field(default=None, description="""The slot to specify an alternative label, name or title for a MaterialEntity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['MaterialisticMixin'],
@@ -9883,7 +9883,7 @@ class Yield(QuantitativeAttribute):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
          'exact_mappings': ['VOC4CAT:0005005'],
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -9992,7 +9992,7 @@ class MolarEquivalent(QuantitativeAttribute):
     A dimensionless ratio that quantifies the stoichiometric proportion of a chemical substance relative to a reference substance in a chemical reaction.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -10101,7 +10101,7 @@ class PercentageOfTotal(QuantitativeAttribute):
     A dimensionless ratio that quantifies the stoichiometric proportion of a chemical substance relative to a reference substance in a chemical reaction.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'qudt:Quantity',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',
@@ -10211,7 +10211,7 @@ class SubstanceSample(MaterialSample, ChemicalSubstanceMixin):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'aliases': ['analyte'],
          'class_uri': 'SIO:001378',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/',
          'mixins': ['ChemicalSubstanceMixin']})
 
     has_concentration: Optional[list[Concentration]] = Field(default=[], description="""The slot to provide the Concentration of a ChemicalSubstance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ChemicalSubstanceMixin'],
@@ -10392,7 +10392,7 @@ class PolymerSample(SubstanceSample, PolymerMixin):
     A SubstanceSample derived from a Polymer.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'SIO:001378',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/',
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/',
          'mixins': ['PolymerMixin'],
          'todos': ['Find a better mapping, as it is currently mapped to same ontology '
                    'class as its parent.']})
@@ -10575,7 +10575,7 @@ class Laboratory(Surrounding):
     A facility that provides controlled conditions in which scientific or technological research, experiments, and measurement may be performed.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'ENVO:01001405',
-         'from_schema': 'https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/'})
+         'from_schema': 'https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/'})
 
     title: Optional[str] = Field(default=None, description="""This slot is described in more detail within the class in which it is used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Activity',
                        'AgenticEntity',

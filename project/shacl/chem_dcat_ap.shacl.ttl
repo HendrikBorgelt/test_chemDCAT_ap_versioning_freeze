@@ -624,7 +624,7 @@ linkml:Any a sh:NodeShape ;
             sh:path dcterms:title ] ;
     sh:targetClass linkml:Any .
 
-<https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/ChemicalSubstanceMixin> a sh:NodeShape ;
+<https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/ChemicalSubstanceMixin> a sh:NodeShape ;
     sh:closed false ;
     sh:description "A LinkML mixin used to pass down properties common to all material entities that are described in a chemical context via being composed of chemical entities (e.g. atom, molecule, ion, ion pair, radical, complex, conformer etc., ) of the same type or of different types." ;
     sh:ignoredProperties ( rdf:type ) ;
@@ -694,9 +694,9 @@ linkml:Any a sh:NodeShape ;
             sh:nodeKind sh:BlankNodeOrIRI ;
             sh:order 5 ;
             sh:path SIO:000008 ] ;
-    sh:targetClass <https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/ChemicalSubstanceMixin> .
+    sh:targetClass <https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/ChemicalSubstanceMixin> .
 
-<https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/PolymerMixin> a sh:NodeShape ;
+<https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/PolymerMixin> a sh:NodeShape ;
     sh:closed false ;
     sh:description "A LinkML mixin used to pass down properties common to all chemical substances that are composed of macromolecules of different kinds and which may be differentiated by composition, length, degree of branching etc.." ;
     sh:ignoredProperties ( rdf:type ) ;
@@ -766,9 +766,9 @@ linkml:Any a sh:NodeShape ;
             sh:maxCount 1 ;
             sh:order 7 ;
             sh:path SIO:000008 ] ;
-    sh:targetClass <https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/PolymerMixin> .
+    sh:targetClass <https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/PolymerMixin> .
 
-<https://w3id.org/nfdi-de/dcat-ap-plus/materials/MaterialisticMixin> a sh:NodeShape ;
+<https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/MaterialisticMixin> a sh:NodeShape ;
     sh:closed false ;
     sh:description "A LinkML mixin used to pass down properties common to all material entities. It is needed for example to have MaterialSample have the same properties as MaterialEntity, although it is defined as a subclass of EvaluatedEntity." ;
     sh:ignoredProperties ( BFO:0000051 rdf:type ) ;
@@ -808,7 +808,7 @@ linkml:Any a sh:NodeShape ;
             sh:nodeKind sh:Literal ;
             sh:order 0 ;
             sh:path skos:altLabel ] ;
-    sh:targetClass <https://w3id.org/nfdi-de/dcat-ap-plus/materials/MaterialisticMixin> .
+    sh:targetClass <https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/MaterialisticMixin> .
 
 AFE:0000153 a sh:NodeShape ;
     sh:closed true ;
