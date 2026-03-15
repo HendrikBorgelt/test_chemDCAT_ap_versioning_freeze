@@ -1,6 +1,6 @@
 ---
 id: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
-version: "0.1.2.post2.dev0+7e52c5d"  # Managed by dynamic-versioning. Don't change this line!
+version: "0.1.2.post3.dev0+cbe1f00"  # Managed by dynamic-versioning. Don't change this line!
 name: chem-dcat-ap
 title: ChemDCAT-AP
 description: |-
