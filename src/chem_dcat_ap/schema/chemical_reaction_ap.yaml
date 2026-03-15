@@ -52,7 +52,7 @@ default_prefix: chemical_reaction_ap
 default_range: string
 imports:
   - linkml:types
-  - dcatapplus:latest/schema/dcat_ap_plus
+  - dcatapplus:v0.3.0/schema/dcat_ap_plus
   - chemical_entities_ap
 
 classes:
