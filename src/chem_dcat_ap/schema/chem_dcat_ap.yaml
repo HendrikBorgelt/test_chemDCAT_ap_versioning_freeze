@@ -1,6 +1,6 @@
 ---
 id: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
-version: "0.0.0.post5.dev0+e7ae3ba"  # Managed by dynamic-versioning. Don't change this line!
+version: "0.1.2.post2.dev0+7e52c5d"  # Managed by dynamic-versioning. Don't change this line!
 name: chem-dcat-ap
 title: ChemDCAT-AP
 description: |-
@@ -58,7 +58,7 @@ default_prefix: chemdcatap
 default_range: string
 imports:
   - linkml:types
-  - dcatapplus:latest/schema/dcat_ap_plus
+  - dcatapplus:v0.2.0/schema/dcat_ap_plus
   - chemical_entities_ap
   - chemical_reaction_ap
 
