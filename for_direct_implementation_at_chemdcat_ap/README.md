@@ -7,6 +7,9 @@ and was developed and validated in the test repos
 [test_dcat_ap_plus_versioning_freeze](https://github.com/HendrikBorgelt/test_dcat_ap_plus_versioning_freeze) and
 [test_chemDCAT_ap_versioning_freeze](https://github.com/HendrikBorgelt/test_chemDCAT_ap_versioning_freeze).
 
+**No changes are needed in dcat-ap-plus.** The pipeline is entirely self-contained
+within chem-dcat-ap.
+
 ---
 
 ## The problem being solved
@@ -24,35 +27,17 @@ This means every previously deployed version of chem-dcat-ap silently switches
 to the new dcat-ap-plus the moment it is released — retroactively breaking any
 version that was not compatible with the new dcat-ap-plus.
 
-The fix: at release time, pin the import to the **specific dcat-ap-plus version**
-that `latest` resolves to *at that moment*.
+Two fixes work together:
 
----
+1. **Release-time freeze** — at tag push time, the CI pins the import to the
+   specific dcat-ap-plus version that `latest` resolves to at that moment.
+   Only the deployed GitHub Pages snapshot carries the pinned import; source
+   files are never modified.
 
-## How the freeze works
-
-```
-chem-dcat-ap tag pushed (e.g. v1.2.0)
-        │
-        ▼
-CI: fetch https://nfdi-de.github.io/dcat-ap-plus/versions.json
-        │  → find version with alias "latest"  (e.g. "v0.9.2")
-        ▼
-CI: in-place replace in working copy (NOT committed to git)
-        │  src/chem_dcat_ap/schema/*.yaml
-        │  dcatapplus:latest/  →  dcatapplus:v0.9.2/
-        ▼
-CI: just gen-doc  →  mike deploy v1.2.0
-        │  deployed schema at /v1.2.0/schema/ now has frozen import
-        ▼
-CI: semver check — is v1.2.0 ≥ current "latest"?
-        ├─ yes → also set "latest" alias to v1.2.0
-        └─ no  → leave "latest" pointing to newer version
-```
-
-**Source files are never modified.** The `main` branch always contains
-`dcatapplus:latest/schema/dcat_ap_plus` for development convenience.
-Only the snapshot on GitHub Pages carries the pinned import.
+2. **Daily upstream check** — a scheduled workflow polls dcat-ap-plus GitHub
+   Pages once a day, detects any new release, and automatically opens a
+   compatibility freeze PR so maintainers can verify the new version before
+   it affects any chem-dcat-ap release.
 
 ---
 
@@ -68,10 +53,6 @@ for_direct_implementation_at_chemdcat_ap/
     freeze_imports.py                  ← Add to scripts/ in chem-dcat-ap
     should_update_latest.py            ← Add to scripts/ in chem-dcat-ap
 ```
-
-See also `for_direct_implementation_at_dcat_ap_plus/` in the same repo —
-that folder covers the one-time change needed in **dcat-ap-plus** (adding
-the downstream notification step and setting up the PAT secret).
 
 ---
 
@@ -90,18 +71,10 @@ and copy both Python files from `scripts/` here into it.
   (this is a new file — it does not replace anything).
 
 > **Note on action versions:** The production workflow uses stable floating
-> tags (`actions/checkout@v4`, `astral-sh/setup-uv@v5`, etc.) rather than the
-> pinned minor versions used in the test repo. Update these to whatever your
-> project currently uses.
+> tags (`actions/checkout@v4`, `astral-sh/setup-uv@v5`, etc.). Update these
+> to whatever your project currently uses if needed.
 
-### 3. Also update dcat-ap-plus
-
-Follow the instructions in `for_direct_implementation_at_dcat_ap_plus/README.md`
-to add the downstream notification step and PAT secret to dcat-ap-plus.
-Without this, the `handle-upstream-release` workflow will never be triggered
-automatically (it can still be triggered manually via `workflow_dispatch`).
-
-### 4. Verify locally (optional but recommended)
+### 3. Verify locally (optional but recommended)
 
 Run the freeze script in dry-run style to confirm it resolves the alias
 correctly — then discard the change:
@@ -118,7 +91,7 @@ uv run python scripts/freeze_imports.py \
 git checkout src/chem_dcat_ap/schema/
 ```
 
-### 5. Release as usual
+### 4. Release as usual
 
 The release workflow is **unchanged** — just push a version tag:
 
@@ -131,38 +104,40 @@ The CI will automatically freeze the import and handle the `latest` alias.
 
 ---
 
----
-
-## Automatic upstream detection pipeline
-
-Once both repos are set up, every new dcat-ap-plus release triggers the
-following chain automatically — no manual intervention needed:
+## How the pipeline works end to end
 
 ```
-dcat-ap-plus: git tag v1.2.0 && git push
-        │
-        ▼
-dcat-ap-plus deploy-docs.yaml
-  • Deploy /v1.2.0/ and update 'latest' alias
-  • POST repository_dispatch → chem-dcat-ap   (uses DOWNSTREAM_NOTIFY_PAT)
+Every day at 08:00 UTC
         │
         ▼
 chem-dcat-ap handle-upstream-release.yaml
+  • Fetch versions.json from nfdi-de.github.io/dcat-ap-plus
   • Detect current dcatapplus token in source schemas
+  • Skip guard A: already up to date? → stop
+  • Skip guard B: freeze PR already open? → stop
   • Create branch  freeze/dcatapplus-v1.2.0
   • Commit: dcatapplus:<old>/ → dcatapplus:v1.2.0/
-  • Open PR with CI checks
+  • Open PR with CI checklist
   • Post notice on every open PR
         │
         ▼
 Maintainer reviews freeze PR
   • CI green → merge; main now deterministically targets v1.2.0
-  • CI red   → breaking change; fix schema before merging
+  • CI red   → breaking change in v1.2.0; fix schema before merging
+        │
+        ▼
+chem-dcat-ap release: git tag v2.0.0 && git push
+        │
+        ▼
+deploy-docs.yaml (release path)
+  • freeze_imports.py: source already has dcatapplus:v1.2.0/ → no-op
+  • just gen-doc  →  mike deploy v2.0.0
+  • deployed schema at /v2.0.0/schema/ has frozen import
 ```
 
-The `handle-upstream-release` workflow can also be triggered manually via
-**Actions → Handle upstream dcat-ap-plus release → Run workflow** — useful for
-testing the pipeline or backfilling a missed dispatch.
+The `handle-upstream-release` workflow can also be triggered manually at any
+time via **Actions → Handle upstream dcat-ap-plus release → Run workflow** —
+useful for an immediate check or to backfill after a missed schedule run.
 
 ---
 
@@ -238,7 +213,9 @@ deployed cleanly alongside `/v2.0.1/` and `/latest/`.
 | Concern | Approach |
 |---|---|
 | Import freeze scope | `src/chem_dcat_ap/schema/*.yaml` only |
-| When freeze is committed | **Never on `main`** (CI working copy only); **committed on maintenance branches** |
+| Release-time freeze | CI working copy only — never committed to `main` |
+| Upstream change detection | Daily poll of dcat-ap-plus `versions.json` — no secrets, no changes to dcat-ap-plus |
+| Duplicate PR guard | Checks for existing `freeze/dcatapplus-<version>` branch before acting |
 | Schema `id:` | Unchanged — unversioned stable namespace |
 | `latest` alias promotion | Semver-gated via `should_update_latest.py` |
 | Test data | Branch-versioned via git, no explicit versioning needed |
