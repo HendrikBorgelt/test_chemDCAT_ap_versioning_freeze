@@ -1,0 +1,222 @@
+---
+name: Handle upstream dcat-ap-plus release
+
+# Triggered automatically via repository_dispatch from dcat-ap-plus whenever a
+# new version tag is released there.  Can also be triggered manually via
+# workflow_dispatch for testing or to backfill a missed dispatch.
+#
+# What this workflow does
+# -----------------------
+# 1. Detects the current dcatapplus import token in the source schemas
+#    (e.g. 'latest' or 'v0.1.0').
+# 2. If the source is already pinned to the new version, stops early.
+# 3. Otherwise creates a branch  freeze/dcatapplus-<version>,  commits the
+#    updated import, opens a PR, and posts a notice on every open non-freeze PR
+#    so contributors are aware of the upstream change.
+#
+# Secret required in test_dcat_ap_plus_versioning_freeze
+# -------------------------------------------------------
+# DOWNSTREAM_NOTIFY_PAT  — a fine-grained PAT (or classic PAT with repo scope)
+# that has "Contents: Read and write" access on THIS repository so that the
+# dcat-ap-plus deploy-docs workflow can send the repository_dispatch event.
+# See for_direct_implementation_at_chemdcat_ap/README.md for setup details.
+
+on:  # yamllint disable-line rule:truthy
+  repository_dispatch:
+    types: [upstream-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'dcat-ap-plus version to freeze to (e.g. v0.2.0)'
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  create-freeze-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # push the freeze branch
+      pull-requests: write  # open the PR and post comments
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      # ------------------------------------------------------------------
+      # Normalise inputs regardless of trigger type
+      # ------------------------------------------------------------------
+      - name: Resolve target version and upstream repo
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+            echo "upstream_repo=${{ github.event.client_payload.repo }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "upstream_repo=HendrikBorgelt/test_dcat_ap_plus_versioning_freeze" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7.3.1
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Configure git for the bot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # ------------------------------------------------------------------
+      # Detect what the source schemas currently import so we know both
+      # (a) whether an update is needed and
+      # (b) what token to replace (could be 'latest' or an older version).
+      # ------------------------------------------------------------------
+      - name: Detect current dcatapplus import token
+        id: detect
+        env:
+          VERSION: ${{ steps.vars.outputs.version }}
+        run: |
+          CURRENT=$(python3 - <<'EOF'
+          import re, pathlib, sys
+          for f in sorted(pathlib.Path("src/chem_dcat_ap/schema").glob("*.yaml")):
+              m = re.search(r"dcatapplus:([^/\s]+)/", f.read_text())
+              if m:
+                  print(m.group(1))
+                  sys.exit(0)
+          # Fall back to 'latest' if no token found (fresh repo)
+          print("latest")
+          EOF
+          )
+          echo "current_token=${CURRENT}" >> "$GITHUB_OUTPUT"
+          if [ "${CURRENT}" = "${VERSION}" ]; then
+            echo "skip=true"  >> "$GITHUB_OUTPUT"
+            echo "Source already pinned to ${VERSION} — nothing to do."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Will update dcatapplus:${CURRENT}/ -> dcatapplus:${VERSION}/"
+          fi
+
+      # ------------------------------------------------------------------
+      # Create the freeze branch and commit the updated imports
+      # ------------------------------------------------------------------
+      - name: Create freeze branch and commit
+        if: steps.detect.outputs.skip == 'false'
+        id: branch
+        env:
+          VERSION: ${{ steps.vars.outputs.version }}
+          CURRENT_TOKEN: ${{ steps.detect.outputs.current_token }}
+        run: |
+          BRANCH="freeze/dcatapplus-${VERSION}"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          git checkout -b "${BRANCH}"
+
+          uv run python scripts/freeze_imports.py \
+            --schema-dir src/chem_dcat_ap/schema \
+            --prefix dcatapplus \
+            --from-alias "${CURRENT_TOKEN}" \
+            --to-version "${VERSION}"
+
+          git add src/chem_dcat_ap/schema/
+          git commit -m "chore: freeze dcatapplus import to ${VERSION}
+
+          Automatically created in response to the release of
+          dcat-ap-plus ${VERSION}.
+
+          Pins the source schema imports from 'dcatapplus:${CURRENT_TOKEN}/'
+          to 'dcatapplus:${VERSION}/', making local development and all
+          future releases of chem-dcat-ap deterministic against the new
+          upstream version."
+
+          git push origin "${BRANCH}"
+
+      # ------------------------------------------------------------------
+      # Open the PR
+      # ------------------------------------------------------------------
+      - name: Create pull request
+        if: steps.detect.outputs.skip == 'false'
+        id: create-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.vars.outputs.version }}
+          UPSTREAM_REPO: ${{ steps.vars.outputs.upstream_repo }}
+          CURRENT_TOKEN: ${{ steps.detect.outputs.current_token }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          PR_URL=$(gh pr create \
+            --title "chore: freeze dcatapplus import to ${VERSION}" \
+            --base main \
+            --head "${BRANCH}" \
+            --body "$(cat <<EOF
+          ## Upstream release detected: dcat-ap-plus ${VERSION}
+
+          A new version of [dcat-ap-plus](https://github.com/${UPSTREAM_REPO}) has been
+          released: **${VERSION}**.
+
+          This PR updates the source schema imports from \`dcatapplus:${CURRENT_TOKEN}/\`
+          to \`dcatapplus:${VERSION}/\`, making local development and all future releases
+          of chem-dcat-ap deterministic against this upstream version.
+
+          ### Before merging
+          - [ ] CI passes — confirms chem-dcat-ap is compatible with dcat-ap-plus **${VERSION}**
+          - [ ] If CI fails, there are breaking changes in **${VERSION}** that require
+                schema updates in this repo before this PR can be merged
+
+          ### After merging
+          The \`main\` branch will carry \`dcatapplus:${VERSION}/\` in source.
+          The release-time freeze step in \`deploy-docs.yaml\` will be a no-op
+          (the import is already pinned), which is correct and expected behaviour.
+
+          ---
+          *This PR was created automatically by the \`handle-upstream-release\` workflow.*
+          EOF
+          )")
+          echo "pr_url=${PR_URL}" >> "$GITHUB_OUTPUT"
+          echo "Created freeze PR: ${PR_URL}"
+
+      # ------------------------------------------------------------------
+      # Notify all open non-freeze PRs about the upstream change
+      # ------------------------------------------------------------------
+      - name: Post notice on open PRs
+        if: steps.detect.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.vars.outputs.version }}
+          UPSTREAM_REPO: ${{ steps.vars.outputs.upstream_repo }}
+          FREEZE_PR_URL: ${{ steps.create-pr.outputs.pr_url }}
+        run: |
+          gh pr list --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("freeze/") | not) | .number' \
+          | while read -r PR_NUM; do
+            gh pr comment "${PR_NUM}" --body "$(cat <<EOF
+          ## ⚠️ Upstream release: dcat-ap-plus ${VERSION}
+
+          A new version of [dcat-ap-plus](https://github.com/${UPSTREAM_REPO}) has been
+          released: **${VERSION}**.
+
+          **What this means for your PR:**
+          The \`dcatapplus:latest\` alias now points to **${VERSION}**, which may introduce
+          changes that affect your work.
+
+          A compatibility freeze PR has been opened:
+          ${FREEZE_PR_URL}
+
+          Please check whether that PR's CI passes:
+          - **CI green** → dcat-ap-plus ${VERSION} is backwards-compatible; no action needed in your PR.
+          - **CI red** → there are breaking changes; coordinate with maintainers before merging.
+
+          ---
+          *This notice was posted automatically by the \`handle-upstream-release\` workflow.*
+          EOF
+          )"
+          done

@@ -60,13 +60,18 @@ Only the snapshot on GitHub Pages carries the pinned import.
 
 ```
 for_direct_implementation_at_chemdcat_ap/
-  README.md                      ← This file
+  README.md                            ← This file
   workflows/
-    deploy-docs.yaml             ← Drop-in for .github/workflows/deploy-docs.yaml
+    deploy-docs.yaml                   ← Drop-in for .github/workflows/deploy-docs.yaml
+    handle-upstream-release.yaml       ← New workflow (add to .github/workflows/)
   scripts/
-    freeze_imports.py            ← Add to scripts/ in chem-dcat-ap
-    should_update_latest.py      ← Add to scripts/ in chem-dcat-ap
+    freeze_imports.py                  ← Add to scripts/ in chem-dcat-ap
+    should_update_latest.py            ← Add to scripts/ in chem-dcat-ap
 ```
+
+See also `for_direct_implementation_at_dcat_ap_plus/` in the same repo —
+that folder covers the one-time change needed in **dcat-ap-plus** (adding
+the downstream notification step and setting up the PAT secret).
 
 ---
 
@@ -77,17 +82,26 @@ for_direct_implementation_at_chemdcat_ap/
 Create a `scripts/` directory in the root of chem-dcat-ap (if it does not exist)
 and copy both Python files from `scripts/` here into it.
 
-### 2. Replace the deploy-docs workflow
+### 2. Replace / add the workflows
 
-Replace `.github/workflows/deploy-docs.yaml` with `workflows/deploy-docs.yaml`
-from this folder.
+- Replace `.github/workflows/deploy-docs.yaml` with `workflows/deploy-docs.yaml`
+  from this folder.
+- Copy `workflows/handle-upstream-release.yaml` into `.github/workflows/`
+  (this is a new file — it does not replace anything).
 
 > **Note on action versions:** The production workflow uses stable floating
 > tags (`actions/checkout@v4`, `astral-sh/setup-uv@v5`, etc.) rather than the
 > pinned minor versions used in the test repo. Update these to whatever your
 > project currently uses.
 
-### 3. Verify locally (optional but recommended)
+### 3. Also update dcat-ap-plus
+
+Follow the instructions in `for_direct_implementation_at_dcat_ap_plus/README.md`
+to add the downstream notification step and PAT secret to dcat-ap-plus.
+Without this, the `handle-upstream-release` workflow will never be triggered
+automatically (it can still be triggered manually via `workflow_dispatch`).
+
+### 4. Verify locally (optional but recommended)
 
 Run the freeze script in dry-run style to confirm it resolves the alias
 correctly — then discard the change:
@@ -104,7 +118,7 @@ uv run python scripts/freeze_imports.py \
 git checkout src/chem_dcat_ap/schema/
 ```
 
-### 4. Release as usual
+### 5. Release as usual
 
 The release workflow is **unchanged** — just push a version tag:
 
@@ -114,6 +128,41 @@ git push origin v1.2.0
 ```
 
 The CI will automatically freeze the import and handle the `latest` alias.
+
+---
+
+---
+
+## Automatic upstream detection pipeline
+
+Once both repos are set up, every new dcat-ap-plus release triggers the
+following chain automatically — no manual intervention needed:
+
+```
+dcat-ap-plus: git tag v1.2.0 && git push
+        │
+        ▼
+dcat-ap-plus deploy-docs.yaml
+  • Deploy /v1.2.0/ and update 'latest' alias
+  • POST repository_dispatch → chem-dcat-ap   (uses DOWNSTREAM_NOTIFY_PAT)
+        │
+        ▼
+chem-dcat-ap handle-upstream-release.yaml
+  • Detect current dcatapplus token in source schemas
+  • Create branch  freeze/dcatapplus-v1.2.0
+  • Commit: dcatapplus:<old>/ → dcatapplus:v1.2.0/
+  • Open PR with CI checks
+  • Post notice on every open PR
+        │
+        ▼
+Maintainer reviews freeze PR
+  • CI green → merge; main now deterministically targets v1.2.0
+  • CI red   → breaking change; fix schema before merging
+```
+
+The `handle-upstream-release` workflow can also be triggered manually via
+**Actions → Handle upstream dcat-ap-plus release → Run workflow** — useful for
+testing the pipeline or backfilling a missed dispatch.
 
 ---
 
