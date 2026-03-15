@@ -228,3 +228,70 @@ deployed cleanly alongside `/v2.0.1/` and `/latest/`.
 | `latest` alias promotion | Semver-gated via `should_update_latest.py` |
 | Test data | Branch-versioned via git, no explicit versioning needed |
 | Maintenance releases | `v1.x` branch + committed frozen import |
+
+---
+
+## Optional tools: compatibility badge and matrix
+
+These tools surface the health of all deployed versions to **maintainers**
+(via a GitHub Issue) and **downstream users** (via a badge in the README and
+a compatibility matrix page).
+
+### Folder structure additions
+
+```
+for_direct_implementation_at_chemdcat_ap/
+  workflows/
+    check-schema-compatibility.yaml   ← New workflow (add to .github/workflows/)
+  scripts/
+    check_compatibility.py            ← New script (add to scripts/)
+```
+
+### What the workflow does
+
+Runs every **Monday at 06:00 UTC** (plus `workflow_dispatch` for manual runs):
+
+1. Checks every deployed version's frozen `dcatapplus:vX.Y.Z/` import against
+   dcat-ap-plus GitHub Pages (HTTP HEAD request — no auth needed).
+2. Generates `badge.json` and `compatibility.html` and pushes them to the
+   **gh-pages root** as stable, version-independent URLs:
+   - `https://nfdi-de.github.io/chem-dcat-ap/badge.json`
+   - `https://nfdi-de.github.io/chem-dcat-ap/compatibility.html`
+3. **Issue on breakage** — if `latest` has newly become stale, opens a
+   `schema-dep-stale` issue to notify maintainers. The label is created
+   automatically if it does not exist.
+4. **Auto-closes** the issue once `latest` is valid again.
+
+`dev` is excluded from all checks and counts — it has a floating import by design.
+
+### Badge color scale
+
+| Badge | Condition |
+|---|---|
+| 🟢 `all valid` | Every released version's upstream resolves |
+| 🟡🟢 `N version(s) stale` | Some older versions stale, `latest` valid, < 50% total |
+| 🟡 `N versions stale` | ≥ 50% of released versions stale, `latest` valid |
+| 🔴 `latest stale` | The `latest`-aliased version has a broken import |
+
+### Implementation steps
+
+#### 1. Copy the files
+
+- `scripts/check_compatibility.py` → `scripts/check_compatibility.py`
+- `workflows/check-schema-compatibility.yaml` → `.github/workflows/check-schema-compatibility.yaml`
+
+#### 2. Add the badge to the README
+
+```markdown
+[![schema deps](https://img.shields.io/endpoint?url=https://nfdi-de.github.io/chem-dcat-ap/badge.json&style=flat-square)](https://nfdi-de.github.io/chem-dcat-ap/compatibility.html)
+```
+
+#### 3. Run once manually to initialise
+
+After merging, trigger the workflow manually via
+**Actions → Check schema compatibility → Run workflow**
+to generate the initial `badge.json` and `compatibility.html` before the
+first scheduled run.
+
+> The `schema-dep-stale` label and the gh-pages files are all created
+> automatically on the first run — no manual setup beyond copying the files.
