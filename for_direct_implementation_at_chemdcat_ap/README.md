@@ -63,7 +63,15 @@ for_direct_implementation_at_chemdcat_ap/
 Create a `scripts/` directory in the root of chem-dcat-ap (if it does not exist)
 and copy both Python files from `scripts/` here into it.
 
-### 2. Replace / add the workflows
+### 2. Enable Actions to create pull requests (one-time)
+
+In the repository go to **Settings → Actions → General → Workflow permissions**
+and tick **"Allow GitHub Actions to create and approve pull requests"**.
+
+Without this, the `handle-upstream-release` workflow will fail when it tries
+to open the freeze PR.
+
+### 3. Replace / add the workflows
 
 - Replace `.github/workflows/deploy-docs.yaml` with `workflows/deploy-docs.yaml`
   from this folder.
@@ -74,7 +82,7 @@ and copy both Python files from `scripts/` here into it.
 > tags (`actions/checkout@v4`, `astral-sh/setup-uv@v5`, etc.). Update these
 > to whatever your project currently uses if needed.
 
-### 3. Verify locally (optional but recommended)
+### 4. Verify locally (optional but recommended)
 
 Run the freeze script in dry-run style to confirm it resolves the alias
 correctly — then discard the change:
@@ -91,7 +99,7 @@ uv run python scripts/freeze_imports.py \
 git checkout src/chem_dcat_ap/schema/
 ```
 
-### 4. Release as usual
+### 5. Release as usual
 
 The release workflow is **unchanged** — just push a version tag:
 
