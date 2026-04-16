@@ -182,7 +182,7 @@ jobs:
         if: >
           steps.check_uptodate.outputs.skip == 'false' &&
           steps.check_pr.outputs.skip == 'false'
-        uses: astral-sh/setup-uv@v7.3.1
+        uses: astral-sh/setup-uv@v8.0.0
         with:
           python-version: "3.13"
           enable-cache: true
