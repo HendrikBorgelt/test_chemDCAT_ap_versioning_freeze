@@ -1,13 +1,13 @@
 ---
-id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
+id: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/v0.4.5/
 name: chemical-entities-ap
 title: Chemical Entities Application Profile
 description: |-
   This is an application profile for chemical entities to be used for extending the DCAT-AP-PLUS.
 license: CC-BY 4.0
 prefixes:
-  chemical_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
-  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/
+  chemical_entities_ap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/v0.4.5/
+  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/v0.4.5/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
   schema: http://schema.org/
@@ -37,7 +37,7 @@ default_prefix: chemical_entities_ap
 default_range: string
 imports:
   - linkml:types
-  - material_entities_ap
+  - chemdcatap:schema/material_entities_ap
 
 classes:
 
