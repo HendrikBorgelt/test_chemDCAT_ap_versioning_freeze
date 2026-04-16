@@ -91,7 +91,8 @@ jobs:
       # ------------------------------------------------------------------
       # Commit compatibility.md to main so the MkDocs page stays current.
       # Uses the main checkout (not the gh-pages worktree).
-      # [skip ci] prevents a recursive deploy-docs trigger.
+      # No [skip ci] — we want deploy-docs to run so the dev docs on
+      # gh-pages are rebuilt with the updated compatibility page.
       # ------------------------------------------------------------------
       - name: Commit compatibility.md to main branch
         run: |
@@ -100,7 +101,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to compatibility.md — nothing to commit."
           else
-            git commit -m "chore: update schema compatibility matrix [skip ci]"
+            git commit -m "chore: update schema compatibility matrix"
             git push origin main
             echo "Committed updated compatibility.md to main."
           fi
