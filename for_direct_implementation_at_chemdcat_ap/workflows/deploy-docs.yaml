@@ -62,17 +62,23 @@ jobs:
       # -----------------------------------------------------------------------
       # VERSION FREEZE (release tags only)
       #
-      # Pins the dcatapplus prefix value from the unversioned base URL to
-      # the concrete version that 'latest' currently resolves to, and pins
-      # the chemdcatap prefix to the current release tag.  Also strips any
-      # alias/version segment from dcatapplus import paths and converts bare
-      # local imports to chemdcatap:schema/ form.
+      # Pins both prefix values to their concrete versions:
+      #
+      #   dcatapplus: {base}/          ->  dcatapplus: {base}/{upstream_latest}/
+      #   chemdcatap: {base}/chemistry/ -> chemdcatap: {base}/chemistry/{tag}/
+      #
+      # dcatapplus is normally already pinned on main (via the
+      # handle-upstream-release workflow), so the freeze is typically a no-op
+      # for dcatapplus. If for some reason it is still at the base URL the
+      # --versions-url flag ensures it gets pinned to the current upstream
+      # latest. The re-freeze logic in freeze_imports.py also handles the case
+      # where the prefix was already set to a previous version.
       #
       # All changes are applied to the working copy only — NOT committed to
       # git. Source files stay in their development form; every released
       # snapshot on GitHub Pages carries fully versioned, reproducible imports.
       # -----------------------------------------------------------------------
-      - name: Freeze dcat-ap-plus import to current 'latest' version
+      - name: Freeze import prefixes to versioned forms
         if: github.ref_type == 'tag' && github.event_name == 'push'
         run: |
           uv run python scripts/freeze_imports.py \
@@ -81,6 +87,24 @@ jobs:
             --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json \
             --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \
             --chemdcatap-version ${{ github.ref_name }}
+
+      # -----------------------------------------------------------------------
+      # POST-FREEZE VALIDATION (release tags only)
+      #
+      # Verifies that the frozen schema files are self-consistent before the
+      # docs are built and deployed.  Runs gen-yaml on each frozen schema to
+      # catch prefix mismatches or broken imports early.  A failure here aborts
+      # the release without deploying partial docs.
+      # -----------------------------------------------------------------------
+      - name: Validate frozen schemas
+        if: github.ref_type == 'tag' && github.event_name == 'push'
+        run: |
+          echo "Validating frozen schema files..."
+          for f in src/chem_dcat_ap/schema/*.yaml; do
+            echo "  checking: $f"
+            uv run gen-yaml "$f" > /dev/null
+          done
+          echo "All frozen schemas are valid."
 
       - name: Generate schema documentation
         run: |

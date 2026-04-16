@@ -81,10 +81,16 @@ jobs:
 
       # ------------------------------------------------------------------
       # Detect what version the source schemas currently pin dcatapplus to.
-      # New format: version is in the prefix value
-      #   dcatapplus: https://.../v0.3.0/
-      # Old format (legacy): version was in the import path
-      #   dcatapplus:v0.3.0/schema/
+      #
+      # The canonical form on main is: version in the prefix value
+      #   dcatapplus: https://.../v0.5.0/
+      # and the import path has no version token:
+      #   - dcatapplus:schema/dcat_ap_plus
+      #
+      # If dcatapplus is still at the base URL (unversioned — only expected
+      # before the first handle-upstream-release PR has been merged), the
+      # detect step returns "unversioned", which never equals any upstream
+      # version string and therefore always triggers the PR creation.
       # ------------------------------------------------------------------
       - name: Detect current dcatapplus import token
         id: detect
@@ -96,7 +102,7 @@ jobs:
               if m:
                   print(m.group(1))
                   sys.exit(0)
-          # Fallback: no versioned prefix found, not yet pinned
+          # Fallback: dcatapplus is at base URL, not yet pinned to any version
           print("unversioned")
           EOF
           )
