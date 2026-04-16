@@ -1,13 +1,13 @@
 ---
-id: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/
+id: https://w3id.org/nfdi-de/dcat-ap-plus/materials/
 name: material-entity-ap
 title: Material Entities Application Profile
 description: |-
   This is an application profile for material entities to be used for extending the DCAT-AP-PLUS.
 license: CC-BY 4.0
 prefixes:
-  material_entities_ap: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/
-  dcatapplus: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/
+  material_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/materials/
+  dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
   schema: http://schema.org/
@@ -147,7 +147,7 @@ slots:
     is_a: has_quantitative_attribute
     slot_uri: SIO:000008
     range: Temperature
-    description: The slot to provide the Temperature of a MaterialEntity.
+    description: The slot to provide the Temperature of a MaterialEntity or an Activity, whereas the temperature of the Activity is ontologically rooted in the temperature of the material entities that participate in the Activity.
 
   has_mass:
     is_a: has_quantitative_attribute
@@ -171,7 +171,7 @@ slots:
     is_a: has_quantitative_attribute
     slot_uri: SIO:000008
     range: Pressure
-    description: The slot to provide the Pressure of a MaterialEntity.
+    description: The slot to provide data about the pressure of a MaterialEntity or an Activity, whereas the Pressure of an Activity is ontologically a quality borne by the material entities participating in the Activity.
 
   derived_from:
     slot_uri: prov:wasDerivedFrom
