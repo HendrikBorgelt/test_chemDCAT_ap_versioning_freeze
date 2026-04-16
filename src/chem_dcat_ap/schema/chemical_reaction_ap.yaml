@@ -1,13 +1,13 @@
 ---
-id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/
+id: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/v0.4.2/
 name: chemical-reaction-ap
 title: Chemical Reaction Application Profile
 description: |-
   This is an application profile for chemical reactions that is intended to be used as an extension of DCAT-AP-PLUS.
 license: CC-BY 4.0
 prefixes:
-  chemical_reaction_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/
-  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
+  chemical_reaction_ap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/reaction/v0.4.2/
+  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/v0.4.2/
   dcatapplus: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/v0.5.0/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
@@ -53,7 +53,7 @@ default_range: string
 imports:
   - linkml:types
   - dcatapplus:schema/dcat_ap_plus
-  - chemical_entities_ap
+  - chemdcatap:schema/chemical_entities_ap
 
 classes:
 
@@ -62,18 +62,18 @@ classes:
     class_uri: SIO:010345
     description: A process that leads to the transformation of one set of chemical substances to another and that is the subject matter of a DataGeneratingActivity.
     slots:
-      - used_starting_material
-      - used_reactant
-      - generated_product
-      - used_catalyst
-      - used_solvent
-      - has_duration
-      - used_reactor
+      - chemdcatap:schema/used_starting_material
+      - chemdcatap:schema/used_reactant
+      - chemdcatap:schema/generated_product
+      - chemdcatap:schema/used_catalyst
+      - chemdcatap:schema/used_solvent
+      - chemdcatap:schema/has_duration
+      - chemdcatap:schema/used_reactor
       - has_temperature # reused from material_entities_ap.yaml
       - has_pressure # reused from material_entities_ap.yaml
-      - has_yield
-      - has_reaction_step
-      - related_resource
+      - chemdcatap:schema/has_yield
+      - chemdcatap:schema/has_reaction_step
+      - chemdcatap:schema/related_resource
     slot_usage:
       has_temperature:
         description: The slot to specify the Temperature at which a ChemicalReaction takes place.
@@ -97,20 +97,20 @@ classes:
     class_uri: PROCO:0000029
     is_a: MaterialEntity
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
     description: A ChemicalSubstance with that has a starting material role in a synthesis.
     slots:
-      - has_molar_equivalent
+      - chemdcatap:schema/has_molar_equivalent
 
   DissolvingSubstance:
     class_uri: SIO:010417
     is_a: AgenticEntity
     aliases:
-      - solvent
+      - chemdcatap:schema/solvent
     slots:
-      - has_percentage_of_total
+      - chemdcatap:schema/has_percentage_of_total
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
     description: A liquid ChemicalSubstance that dissolves or that is capable of dissolving a ChemicalSubstance.
     exact_mappings:
       - VOC4CAT:0007246
@@ -120,10 +120,10 @@ classes:
     class_uri: SIO:010411
     is_a: MaterialEntity
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
     description: A ChemicalSubstance that is consumed or transformed in a ChemicalReaction.
     slots:
-      - has_molar_equivalent
+      - chemdcatap:schema/has_molar_equivalent
     exact_mappings:
       - NCIT:C802
       - VOC4CAT:0000101
@@ -135,7 +135,7 @@ classes:
     class_uri: NCIT:C48810
     is_a: MaterialEntity
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
     description: A chemical substance that is produced by a ChemicalReaction.
     exact_mappings:
       - VOC4CAT:0000194
@@ -146,10 +146,10 @@ classes:
     class_uri: SIO:010344
     is_a: AgenticEntity
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
     description: A ChemicalSubstance or MaterialEntity that initiates or accelerates a ChemicalReaction without itself being affected.
     slots:
-      - has_molar_equivalent
+      - chemdcatap:schema/has_molar_equivalent
     exact_mappings:
       - VOC4CAT:0000194
       - NCIT:C48810
@@ -160,7 +160,7 @@ classes:
     is_a: Device
     class_uri: AFE:0000153
     mixins:
-      - MaterialisticMixin
+      - chemdcatap:schema/MaterialisticMixin
     description: A reactor is a container for controlling a biological or chemical reaction or process.
     exact_mappings:
       - VOC4CAT:0007017
