@@ -167,9 +167,11 @@ def convert_bare_imports_to_chemdcatap(text: str) -> str:
     and becomes:
       - chemdcatap:schema/chemical_entities_ap
 
-    Only YAML list item lines (2-6 leading spaces, then '- ') whose value
-    part contains no colon and no slash are converted. The special name
-    'linkml:types' is never touched (it already has a colon).
+    Only items inside the top-level ``imports:`` block are converted.
+    Class-level slot lists, mixin lists, etc. are left untouched even
+    though they are also YAML list items with bare names.
+
+    The special import ``linkml:types`` is never touched (already a CURIE).
 
     NOTE: this transformation is only safe to run AFTER the schemas have
     been deployed to gh-pages, because the CURIE URLs must already exist
@@ -177,15 +179,28 @@ def convert_bare_imports_to_chemdcatap(text: str) -> str:
     """
     lines = text.splitlines(keepends=True)
     result = []
+    in_imports_block = False
     for line in lines:
-        # Match lines: 2-6 spaces + '- ' + bare name (letters/digits/underscores/hyphens)
-        m = re.match(r'^( {2,6}- )([A-Za-z][A-Za-z0-9_-]+)(\s*)$', line)
-        if m and ':' not in m.group(2) and '/' not in m.group(2):
-            result.append(
-                f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n"
-            )
-        else:
+        stripped = line.rstrip()
+
+        # Detect the start of the top-level imports: block.
+        if re.match(r'^imports:\s*$', stripped):
+            in_imports_block = True
             result.append(line)
+            continue
+
+        # Any new top-level key (no leading whitespace, not a comment, not a
+        # bare list item) signals the end of the imports block.
+        if stripped and stripped[0] not in (' ', '\t', '#') and not stripped.startswith('-'):
+            in_imports_block = False
+
+        if in_imports_block:
+            m = re.match(r'^(\s+- )([A-Za-z][A-Za-z0-9_-]+)\s*$', line)
+            if m and ':' not in m.group(2) and '/' not in m.group(2):
+                result.append(f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n")
+                continue
+
+        result.append(line)
     return "".join(result)
 
 
