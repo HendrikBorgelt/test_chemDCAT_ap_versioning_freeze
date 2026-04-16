@@ -84,10 +84,24 @@ def freeze_dcatapplus_prefix(text: str, base: str, version: str) -> str:
       dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/
     with:
       dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.3.0/
+
+    Also handles re-freeze when the prefix is already pinned to a previous
+    version, e.g.:
+      dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.3.0/
+    ->
+      dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.4.0/
     """
-    old = f"dcatapplus: {base}/\n"
     new = f"dcatapplus: {base}/{version}/\n"
-    return text.replace(old, new)
+    # First try exact match on the base form (most common during first freeze)
+    old_base = f"dcatapplus: {base}/\n"
+    if old_base in text:
+        return text.replace(old_base, new)
+    # Fall back: replace any already-versioned form  dcatapplus: {base}/{token}/
+    return re.sub(
+        r"dcatapplus: " + re.escape(base) + r"/[^/\s]+/\n",
+        new,
+        text,
+    )
 
 
 def strip_dcatapplus_import_path_token(text: str) -> str:
