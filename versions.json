@@ -7,14 +7,14 @@
   {
     "version": "v0.4.4",
     "title": "v0.4.4",
-    "aliases": []
+    "aliases": [
+      "latest"
+    ]
   },
   {
     "version": "v0.4.3",
     "title": "v0.4.3",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "v0.4.2",
