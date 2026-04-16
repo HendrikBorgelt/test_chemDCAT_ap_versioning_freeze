@@ -1,12 +1,12 @@
 ---
-id: https://w3id.org/nfdi-de/dcat-ap-plus/materials/
+id: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/v0.4.4/
 name: material-entity-ap
 title: Material Entities Application Profile
 description: |-
   This is an application profile for material entities to be used for extending the DCAT-AP-PLUS.
 license: CC-BY 4.0
 prefixes:
-  material_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/materials/
+  material_entities_ap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/materials/v0.4.4/
   dcatapplus: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/v0.5.0/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
@@ -41,20 +41,20 @@ classes:
     abstract: true
     description: A LinkML mixin used to pass down properties common to all material entities. It is needed for example to have MaterialSample have the same properties as MaterialEntity, although it is defined as a subclass of EvaluatedEntity.
     slots:
-      - alternative_label
-      - has_physical_state
-      - has_temperature
-      - has_mass
-      - has_volume
-      - has_density
-      - has_pressure
+      - chemdcatap:schema/alternative_label
+      - chemdcatap:schema/has_physical_state
+      - chemdcatap:schema/has_temperature
+      - chemdcatap:schema/has_mass
+      - chemdcatap:schema/has_volume
+      - chemdcatap:schema/has_density
+      - chemdcatap:schema/has_pressure
       # more slots might need to be defined for a MaterialEntity
 
   MaterialEntity:
     class_uri: BFO:0000040
     is_a: Entity
     mixins:
-      - MaterialisticMixin
+      - chemdcatap:schema/MaterialisticMixin
     description: A material is an Entity that has some portion of matter as proper part.
     slot_usage:
       has_part:
@@ -70,9 +70,9 @@ classes:
     class_uri: OBI:0000747
     description: A Sample that was derived from a previous MaterialSample or some other kind of MaterialEntity.
     mixins:
-      - MaterialisticMixin
+      - chemdcatap:schema/MaterialisticMixin
     slots:
-      - derived_from
+      - chemdcatap:schema/derived_from
     slot_usage:
       derived_from:
         description: The slot to specify the MaterialEntity or MaterialSample from which the MaterialSample was created.

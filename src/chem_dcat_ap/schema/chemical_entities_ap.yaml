@@ -1,13 +1,13 @@
 ---
-id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
+id: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/v0.4.4/
 name: chemical-entities-ap
 title: Chemical Entities Application Profile
 description: |-
   This is an application profile for chemical entities to be used for extending the DCAT-AP-PLUS.
 license: CC-BY 4.0
 prefixes:
-  chemical_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
-  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/
+  chemical_entities_ap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/entity/v0.4.4/
+  chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/v0.4.4/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
   schema: http://schema.org/
@@ -37,7 +37,7 @@ default_prefix: chemical_entities_ap
 default_range: string
 imports:
   - linkml:types
-  - material_entities_ap
+  - chemdcatap:schema/material_entities_ap
 
 classes:
 
@@ -48,17 +48,17 @@ classes:
     class_uri: SIO:001378
     is_a: MaterialSample
     aliases:
-      - analyte
+      - chemdcatap:schema/analyte
     description: A MaterialSample derived from a chemical substance that is of interest in an analytical procedure.
     mixins:
-      - ChemicalSubstanceMixin
+      - chemdcatap:schema/ChemicalSubstanceMixin
 
   PolymerSample:
     is_a: SubstanceSample
     class_uri: SIO:001378
     description: A SubstanceSample derived from a Polymer.
     mixins:
-      - PolymerMixin
+      - chemdcatap:schema/PolymerMixin
     todos:
       - "Find a better mapping, as it is currently mapped to same ontology class as its parent."
 
@@ -72,12 +72,12 @@ classes:
       - molecular entity
     description: Any constitutionally or isotopically distinct atom, molecule, ion, ion pair, radical, radical ion, complex, conformer etc., identifiable as a separately distinguishable entity.
     slots:
-      - inchi
-      - inchikey
-      - smiles
-      - molecular_formula
-      - iupac_name
-      - has_molar_mass
+      - chemdcatap:schema/inchi
+      - chemdcatap:schema/inchikey
+      - chemdcatap:schema/smiles
+      - chemdcatap:schema/molecular_formula
+      - chemdcatap:schema/iupac_name
+      - chemdcatap:schema/has_molar_mass
     slot_usage:
       has_part:
         slot_uri: BFO:0000051
@@ -125,7 +125,7 @@ classes:
     class_uri: qudt:Quantity
     is_a: QuantitativeAttribute
     aliases:
-      - SubstanceAmount
+      - chemdcatap:schema/SubstanceAmount
     description: The total amount of substance used in a ChemicalReaction.
     close_mappings:
       - PATO:0000070
@@ -177,10 +177,10 @@ classes:
     is_a: MaterialisticMixin
     description: A LinkML mixin used to pass down properties common to all material entities that are described in a chemical context via being composed of chemical entities (e.g. atom, molecule, ion, ion pair, radical, complex, conformer etc., ) of the same type or of different types.
     slots:
-      - has_concentration
-      - has_ph_value
-      - composed_of
-      - has_amount
+      - chemdcatap:schema/has_concentration
+      - chemdcatap:schema/has_ph_value
+      - chemdcatap:schema/composed_of
+      - chemdcatap:schema/has_amount
   PolymerMixin:
     abstract: true
     is_a: ChemicalSubstanceMixin
