@@ -62,20 +62,25 @@ jobs:
       # -----------------------------------------------------------------------
       # VERSION FREEZE (release tags only)
       #
-      # Replaces  dcatapplus:latest/  with  dcatapplus:<resolved-version>/
-      # in the schema YAML files of the working copy (NOT committed to git).
-      # This ensures every snapshot deployed to GitHub Pages carries a pinned,
-      # reproducible import while source files continue to use 'latest' during
-      # normal development on the main branch.
+      # Pins the dcatapplus prefix value from the unversioned base URL to
+      # the concrete version that 'latest' currently resolves to, and pins
+      # the chemdcatap prefix to the current release tag.  Also strips any
+      # alias/version segment from dcatapplus import paths and converts bare
+      # local imports to chemdcatap:schema/ form.
+      #
+      # All changes are applied to the working copy only — NOT committed to
+      # git. Source files stay in their development form; every released
+      # snapshot on GitHub Pages carries fully versioned, reproducible imports.
       # -----------------------------------------------------------------------
       - name: Freeze dcat-ap-plus import to current 'latest' version
         if: github.ref_type == 'tag' && github.event_name == 'push'
         run: |
           uv run python scripts/freeze_imports.py \
             --schema-dir src/chem_dcat_ap/schema \
-            --prefix dcatapplus \
-            --from-alias latest \
-            --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json
+            --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \
+            --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \
+            --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \
+            --chemdcatap-version ${{ github.ref_name }}
 
       - name: Generate schema documentation
         run: |

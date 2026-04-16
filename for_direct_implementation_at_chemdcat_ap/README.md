@@ -15,11 +15,17 @@ within chem-dcat-ap.
 ## The problem being solved
 
 `chem_dcat_ap.yaml`, `chemical_reaction_ap.yaml`, and `material_entities_ap.yaml`
-all import dcat-ap-plus via:
+all import dcat-ap-plus via a prefix-based import. On `main` (development), schemas
+use a bare, unversioned prefix:
 
 ```yaml
+prefixes:
+  dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/    # no version
+  chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
+
 imports:
-  - dcatapplus:latest/schema/dcat_ap_plus
+  - dcatapplus:latest/schema/dcat_ap_plus    # 'latest/' convenience alias
+  - chemical_entities_ap                      # bare local import
 ```
 
 `latest` is a **live alias** that mike updates on every dcat-ap-plus release.
@@ -29,15 +35,26 @@ version that was not compatible with the new dcat-ap-plus.
 
 Two fixes work together:
 
-1. **Release-time freeze** — at tag push time, the CI pins the import to the
-   specific dcat-ap-plus version that `latest` resolves to at that moment.
-   Only the deployed GitHub Pages snapshot carries the pinned import; source
-   files are never modified.
+1. **Release-time freeze** — at tag push time, the CI pins the version into the
+   prefix value (e.g. `dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.3.0/`)
+   and converts bare local imports to `chemdcatap:schema/` form. Only the deployed
+   GitHub Pages snapshot carries the pinned prefixes; source files are never modified.
+
+   Released schema example:
+   ```yaml
+   prefixes:
+     dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.3.0/    # version in prefix
+     chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/v0.2.0/
+
+   imports:
+     - dcatapplus:schema/dcat_ap_plus          # no version in path
+     - chemdcatap:schema/chemical_entities_ap   # versioned via prefix
+   ```
 
 2. **Daily upstream check** — a scheduled workflow polls dcat-ap-plus GitHub
    Pages once a day, detects any new release, and automatically opens a
-   compatibility freeze PR so maintainers can verify the new version before
-   it affects any chem-dcat-ap release.
+   compatibility freeze PR (pinning the `dcatapplus` prefix) so maintainers
+   can verify the new version before it affects any chem-dcat-ap release.
 
 ---
 
@@ -46,6 +63,7 @@ Two fixes work together:
 ```
 for_direct_implementation_at_chemdcat_ap/
   README.md                            ← This file
+  VERSIONING_ISSUE.md                  ← GitHub Issue description for implementors
   workflows/
     deploy-docs.yaml                   ← Drop-in for .github/workflows/deploy-docs.yaml
     handle-upstream-release.yaml       ← New workflow (add to .github/workflows/)
@@ -84,16 +102,17 @@ to open the freeze PR.
 
 ### 4. Verify locally (optional but recommended)
 
-Run the freeze script in dry-run style to confirm it resolves the alias
+Run the freeze script to confirm it resolves the alias and pins the prefixes
 correctly — then discard the change:
 
 ```bash
-# Check which version 'latest' currently resolves to
+# Freeze both dcatapplus (auto-resolve via versions.json) and chemdcatap (explicit tag)
 uv run python scripts/freeze_imports.py \
     --schema-dir src/chem_dcat_ap/schema \
-    --prefix dcatapplus \
-    --from-alias latest \
-    --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json
+    --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \
+    --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json \
+    --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \
+    --chemdcatap-version v1.0.0
 
 # Revert — the CI never commits this change, but locally you need to undo it
 git checkout src/chem_dcat_ap/schema/
@@ -120,17 +139,17 @@ Every day at 08:00 UTC
         ▼
 chem-dcat-ap handle-upstream-release.yaml
   • Fetch versions.json from nfdi-de.github.io/dcat-ap-plus
-  • Detect current dcatapplus token in source schemas
-  • Skip guard A: already up to date? → stop
+  • Detect version pinned in dcatapplus prefix (new format: in prefix value)
+  • Skip guard A: already pinned to upstream latest? → stop
   • Skip guard B: freeze PR already open? → stop
   • Create branch  freeze/dcatapplus-v1.2.0
-  • Commit: dcatapplus:<old>/ → dcatapplus:v1.2.0/
+  • Commit: pin dcatapplus prefix to https://.../v1.2.0/
   • Open PR with CI checklist
   • Post notice on every open PR
         │
         ▼
 Maintainer reviews freeze PR
-  • CI green → merge; main now deterministically targets v1.2.0
+  • CI green → merge; main now has dcatapplus prefix pinned to v1.2.0
   • CI red   → breaking change in v1.2.0; fix schema before merging
         │
         ▼
@@ -138,9 +157,10 @@ chem-dcat-ap release: git tag v2.0.0 && git push
         │
         ▼
 deploy-docs.yaml (release path)
-  • freeze_imports.py: source already has dcatapplus:v1.2.0/ → no-op
+  • freeze_imports.py: dcatapplus prefix already pinned → no-op for dcatapplus
+  • also pins chemdcatap prefix to v2.0.0 and converts bare imports
   • just gen-doc  →  mike deploy v2.0.0
-  • deployed schema at /v2.0.0/schema/ has frozen import
+  • deployed schema at /v2.0.0/schema/ has fully versioned prefix URIs
 ```
 
 The `handle-upstream-release` workflow can also be triggered manually at any
@@ -187,20 +207,21 @@ Use a **maintenance branch**:
 git checkout -b v1.x v1.10.3
 ```
 
-On the `v1.x` branch, **commit the frozen import** to git (unlike the
-`main`-branch approach where only CI freezes it). This ensures that
+On the `v1.x` branch, **commit the frozen prefixes** to git (unlike the
+`main`-branch approach where only CI freezes them). This ensures that
 `just test` works correctly locally and in CI for v1.x:
 
 ```bash
 # On the v1.x branch, run the freeze and commit the result
 uv run python scripts/freeze_imports.py \
     --schema-dir src/chem_dcat_ap/schema \
-    --prefix dcatapplus \
-    --from-alias latest \
-    --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json
+    --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \
+    --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json \
+    --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \
+    --chemdcatap-version v1.x.0
 
 git add src/chem_dcat_ap/schema/
-git commit -m "chore: freeze dcatapplus import to <version> for v1.x maintenance"
+git commit -m "chore: freeze dcatapplus and chemdcatap prefixes for v1.x maintenance"
 ```
 
 Now apply your fix, then release:
@@ -251,12 +272,18 @@ for_direct_implementation_at_chemdcat_ap/
 
 Runs every **Monday at 06:00 UTC** (plus `workflow_dispatch` for manual runs):
 
-1. Checks every deployed version's frozen `dcatapplus:vX.Y.Z/` import against
-   dcat-ap-plus GitHub Pages (HTTP HEAD request — no auth needed).
-2. Generates `badge.json` and `compatibility.html` and pushes them to the
-   **gh-pages root** as stable, version-independent URLs:
-   - `https://nfdi-de.github.io/chem-dcat-ap/badge.json`
-   - `https://nfdi-de.github.io/chem-dcat-ap/compatibility.html`
+1. Checks every deployed version's frozen `dcatapplus` prefix version against
+   dcat-ap-plus GitHub Pages (HTTP HEAD request — no auth needed). Supports
+   both the new format (version in prefix value) and the old format (version
+   in import path) for backwards compatibility.
+2. Generates `badge.json`, `compatibility.html`, and `compatibility.md`:
+   - `badge.json` and `compatibility.html` → pushed to the **gh-pages root**
+     as stable, version-independent URLs:
+     - `https://nfdi-de.github.io/chem-dcat-ap/badge.json`
+     - `https://nfdi-de.github.io/chem-dcat-ap/compatibility.html`
+   - `compatibility.md` → committed to `main` at `docs/compatibility.md`,
+     served through MkDocs at
+     `https://nfdi-de.github.io/chem-dcat-ap/latest/compatibility/`
 3. **Issue on breakage** — if `latest` has newly become stale, opens a
    `schema-dep-stale` issue to notify maintainers. The label is created
    automatically if it does not exist.
@@ -280,18 +307,40 @@ Runs every **Monday at 06:00 UTC** (plus `workflow_dispatch` for manual runs):
 - `scripts/check_compatibility.py` → `scripts/check_compatibility.py`
 - `workflows/check-schema-compatibility.yaml` → `.github/workflows/check-schema-compatibility.yaml`
 
-#### 2. Add the badge to the README
+#### 2. Add `docs/compatibility.md` and update `mkdocs.yml`
+
+Create `docs/compatibility.md` as a placeholder (the workflow will overwrite it):
 
 ```markdown
-[![schema deps](https://img.shields.io/endpoint?url=https://nfdi-de.github.io/chem-dcat-ap/badge.json&style=flat-square)](https://nfdi-de.github.io/chem-dcat-ap/compatibility.html)
+---
+title: Schema Compatibility
+---
+
+# Schema Compatibility Matrix
+
+*This page is auto-generated by the `check-schema-compatibility` workflow (runs weekly on Mondays). Trigger it manually from the Actions tab to refresh.*
+
+| chem-dcat-ap version | dcat-ap-plus dependency | Status |
+|---|---|---|
+| — | — | Not yet generated |
 ```
 
-#### 3. Run once manually to initialise
+Add `- Compatibility: compatibility.md` to the `nav:` section of `mkdocs.yml`
+after `- Versioning: versioning.md`.
+
+#### 3. Add the badge to the README
+
+```markdown
+[![schema deps](https://img.shields.io/endpoint?url=https://nfdi-de.github.io/chem-dcat-ap/badge.json&style=flat-square)](https://nfdi-de.github.io/chem-dcat-ap/latest/compatibility/)
+```
+
+#### 4. Run once manually to initialise
 
 After merging, trigger the workflow manually via
 **Actions → Check schema compatibility → Run workflow**
-to generate the initial `badge.json` and `compatibility.html` before the
-first scheduled run.
+to generate the initial `badge.json`, `compatibility.html`, and commit
+`compatibility.md` to `main` before the first scheduled run.
 
-> The `schema-dep-stale` label and the gh-pages files are all created
-> automatically on the first run — no manual setup beyond copying the files.
+> The `schema-dep-stale` label and all output files are created automatically
+> on the first run — no manual setup beyond copying the files and the
+> placeholder `docs/compatibility.md`.

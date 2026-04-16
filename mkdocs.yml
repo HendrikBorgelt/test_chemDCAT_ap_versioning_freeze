@@ -79,6 +79,7 @@ nav:
   - Home: index.md
   - Schema: elements/overview.md
   - Versioning: versioning.md
+  - Compatibility: compatibility.md
   - About: about.md
 
 # enable version selector for multi-version support

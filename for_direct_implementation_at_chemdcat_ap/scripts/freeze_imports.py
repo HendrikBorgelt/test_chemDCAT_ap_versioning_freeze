@@ -1,39 +1,54 @@
 #!/usr/bin/env python3
-"""Freeze LinkML schema import aliases to a specific resolved version.
+"""Freeze LinkML schema imports to specific resolved versions.
 
-At release time the CI calls this script to replace every occurrence of
-``{prefix}:{alias}/`` (e.g. ``dcatapplus:latest/``) in the schema YAML
-files with the concrete version that the alias currently points to
-(e.g. ``dcatapplus:v0.2.0/``).
+At release time the CI calls this script to:
 
-The modification is made to the *working copy only* — it is **not**
-committed back to git. This keeps the source files permanently set to
-``latest`` for development convenience while ensuring every released
-snapshot on GitHub Pages carries a frozen, reproducible import.
+1. Pin the ``dcatapplus`` prefix value from
+   ``dcatapplus: {base}/`` to ``dcatapplus: {base}/{version}/``
+   (version moves into the prefix URI, not the import path).
 
-Usage (auto-resolve the alias via mike versions.json):
+2. Strip any version/alias segment from ``dcatapplus:`` import paths
+   e.g. ``dcatapplus:latest/schema/`` -> ``dcatapplus:schema/``
+
+3. Pin the ``chemdcatap`` prefix value from
+   ``chemdcatap: {base}/`` to ``chemdcatap: {base}/{version}/``
+
+4. Convert bare local sub-module imports to ``chemdcatap:schema/`` imports
+   e.g. ``  - chemical_entities_ap`` -> ``  - chemdcatap:schema/chemical_entities_ap``
+
+The modifications are made to the *working copy only* — they are **not**
+committed back to git. Source files stay in their development form
+(bare imports, unversioned prefix) while every released GitHub Pages
+snapshot carries fully versioned, reproducible imports.
+
+Usage (auto-resolve dcatapplus version via mike versions.json,
+       freeze chemdcatap to the current release tag):
+
     uv run python scripts/freeze_imports.py \\
         --schema-dir src/chem_dcat_ap/schema \\
-        --prefix dcatapplus \\
-        --from-alias latest \\
-        --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json
+        --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \\
+        --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \\
+        --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \\
+        --chemdcatap-version v0.2.0
 
-Usage (explicit version):
+Usage (explicit dcatapplus version, no chemdcatap freeze):
+
     uv run python scripts/freeze_imports.py \\
         --schema-dir src/chem_dcat_ap/schema \\
-        --prefix dcatapplus \\
-        --from-alias latest \\
-        --to-version v0.2.0
+        --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \\
+        --dcatapplus-version v0.3.0
 
 Exit codes
 ----------
-0  Success. The resolved/used version is printed as ``FROZEN_VERSION=<v>``
-   on the last line of stdout so shell callers can capture it easily.
+0  Success. Machine-parseable KEY=VALUE lines are printed on stdout:
+     FROZEN_VERSION=<dcatapplus_version>           (if dcatapplus was frozen)
+     FROZEN_CHEMDCATAP_VERSION=<chemdcatap_version> (if chemdcatap was frozen)
 1  Error — details on stderr.
 """
 
 import argparse
 import json
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -43,7 +58,7 @@ from pathlib import Path
 # Core helpers
 # ---------------------------------------------------------------------------
 
-def resolve_alias(versions_url: str, alias: str) -> str:
+def resolve_alias(versions_url: str, alias: str = "latest") -> str:
     """Return the version string that currently carries *alias* in mike's versions.json."""
     try:
         with urllib.request.urlopen(versions_url, timeout=15) as resp:
@@ -62,22 +77,95 @@ def resolve_alias(versions_url: str, alias: str) -> str:
     )
 
 
-def freeze_in_dir(
-    schema_dir: Path, prefix: str, from_alias: str, to_version: str
-) -> list:
-    """Replace ``prefix:from_alias/`` with ``prefix:to_version/`` in all YAML files.
+def freeze_dcatapplus_prefix(text: str, base: str, version: str) -> str:
+    """Pin the dcatapplus prefix value: base/ -> base/version/
 
-    Returns the list of file names that were actually changed.
+    Replaces lines like:
+      dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/
+    with:
+      dcatapplus: https://w3id.org/nfdi-de/dcat-ap-plus/v0.3.0/
     """
-    old_token = f"{prefix}:{from_alias}/"
-    new_token = f"{prefix}:{to_version}/"
-    changed = []
-    for yaml_file in sorted(schema_dir.glob("*.yaml")):
-        text = yaml_file.read_text(encoding="utf-8")
-        if old_token in text:
-            yaml_file.write_text(text.replace(old_token, new_token), encoding="utf-8")
-            changed.append(yaml_file.name)
-    return changed
+    old = f"dcatapplus: {base}/\n"
+    new = f"dcatapplus: {base}/{version}/\n"
+    return text.replace(old, new)
+
+
+def strip_dcatapplus_import_path_token(text: str) -> str:
+    """Remove any version/alias token from dcatapplus import paths.
+
+    Handles patterns like:
+      - dcatapplus:latest/schema/foo   -> dcatapplus:schema/foo
+      - dcatapplus:v0.3.0/schema/foo  -> dcatapplus:schema/foo
+
+    Only matches when there is a token (non-colon, non-slash chars) between
+    'dcatapplus:' and '/schema/' — does not touch lines already in the
+    'dcatapplus:schema/' form.
+    """
+    return re.sub(r"dcatapplus:[^:/\s]+/schema/", "dcatapplus:schema/", text)
+
+
+def freeze_chemdcatap_prefix(text: str, base: str, version: str) -> str:
+    """Pin the chemdcatap prefix value: base/ -> base/version/
+
+    Replaces lines like:
+      chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
+    with:
+      chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/v0.2.0/
+    """
+    old = f"chemdcatap: {base}/\n"
+    new = f"chemdcatap: {base}/{version}/\n"
+    return text.replace(old, new)
+
+
+def convert_bare_imports_to_chemdcatap(text: str) -> str:
+    """Convert bare local sub-module imports to chemdcatap-prefixed form.
+
+    A bare import line looks like:
+      - chemical_entities_ap
+    and becomes:
+      - chemdcatap:schema/chemical_entities_ap
+
+    Only YAML list item lines (2-6 leading spaces, then '- ') whose value
+    part contains no colon and no slash are converted. The special name
+    'linkml:types' is never touched (it already has a colon).
+    """
+    lines = text.splitlines(keepends=True)
+    result = []
+    for line in lines:
+        # Match lines: 2-6 spaces + '- ' + bare name (letters/digits/underscores/hyphens)
+        m = re.match(r'^( {2,6}- )([A-Za-z][A-Za-z0-9_-]+)(\s*)$', line)
+        if m and ':' not in m.group(2) and '/' not in m.group(2):
+            result.append(f"{m.group(1)}chemdcatap:schema/{m.group(2)}{m.group(3)}\n"
+                          if not line.endswith('\n')
+                          else f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n")
+        else:
+            result.append(line)
+    return "".join(result)
+
+
+def process_file(
+    yaml_file: Path,
+    dcatapplus_base: str | None,
+    dcatapplus_version: str | None,
+    chemdcatap_base: str | None,
+    chemdcatap_version: str | None,
+) -> bool:
+    """Apply all requested freezes to one file. Returns True if the file changed."""
+    text = yaml_file.read_text(encoding="utf-8")
+    original = text
+
+    if dcatapplus_base and dcatapplus_version:
+        text = freeze_dcatapplus_prefix(text, dcatapplus_base, dcatapplus_version)
+        text = strip_dcatapplus_import_path_token(text)
+
+    if chemdcatap_base and chemdcatap_version:
+        text = freeze_chemdcatap_prefix(text, chemdcatap_base, chemdcatap_version)
+        text = convert_bare_imports_to_chemdcatap(text)
+
+    if text != original:
+        yaml_file.write_text(text, encoding="utf-8")
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -95,30 +183,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory containing the schema YAML files to update.",
     )
     p.add_argument(
-        "--prefix",
-        required=True,
-        help="The LinkML prefix whose alias should be frozen, e.g. 'dcatapplus'.",
-    )
-    p.add_argument(
-        "--from-alias",
-        default="latest",
-        help="The alias token to replace in import paths (default: 'latest').",
-    )
-    p.add_argument(
-        "--to-version",
+        "--dcatapplus-base",
         default=None,
         help=(
-            "Explicit version to freeze to (e.g. 'v0.2.0'). "
-            "Mutually exclusive with --versions-url. "
-            "If both are given, --to-version takes precedence."
+            "Base URL for the dcatapplus prefix, no trailing slash. "
+            "e.g. https://w3id.org/nfdi-de/dcat-ap-plus"
         ),
+    )
+    p.add_argument(
+        "--dcatapplus-version",
+        default=None,
+        help=(
+            "Explicit version to pin dcatapplus to (e.g. 'v0.3.0'). "
+            "If omitted and --versions-url is given, the 'latest' alias is resolved."
+        ),
+    )
+    p.add_argument(
+        "--chemdcatap-base",
+        default=None,
+        help=(
+            "Base URL for the chemdcatap prefix, no trailing slash. "
+            "e.g. https://w3id.org/nfdi-de/dcat-ap-plus/chemistry"
+        ),
+    )
+    p.add_argument(
+        "--chemdcatap-version",
+        default=None,
+        help="Version to pin chemdcatap to (e.g. the current release tag 'v0.2.0').",
     )
     p.add_argument(
         "--versions-url",
         default=None,
         help=(
-            "URL to the mike versions.json of the upstream schema repo "
-            "(used to auto-resolve the alias when --to-version is not given)."
+            "URL to the mike versions.json of the upstream dcat-ap-plus repo. "
+            "Used to auto-resolve the 'latest' alias when --dcatapplus-version "
+            "is not given."
         ),
     )
     return p
@@ -132,37 +231,66 @@ def main() -> int:
         print(f"ERROR: not a directory: {schema_dir}", file=sys.stderr)
         return 1
 
-    # Resolve target version
-    if args.to_version:
-        version = args.to_version
-    elif args.versions_url:
-        print(f"Resolving alias '{args.from_alias}' from: {args.versions_url}")
-        try:
-            version = resolve_alias(args.versions_url, args.from_alias)
-        except Exception as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
+    # ------------------------------------------------------------------
+    # Resolve dcatapplus version
+    # ------------------------------------------------------------------
+    dcatapplus_version: str | None = None
+    if args.dcatapplus_base:
+        if args.dcatapplus_version:
+            dcatapplus_version = args.dcatapplus_version
+        elif args.versions_url:
+            print(f"Resolving 'latest' alias from: {args.versions_url}")
+            try:
+                dcatapplus_version = resolve_alias(args.versions_url, "latest")
+            except Exception as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                return 1
+            print(f"  -> resolved to: {dcatapplus_version}")
+        else:
+            print(
+                "ERROR: --dcatapplus-base given but neither --dcatapplus-version "
+                "nor --versions-url was provided.",
+                file=sys.stderr,
+            )
             return 1
-        print(f"  -> resolved to: {version}")
-    else:
+
+    chemdcatap_version: str | None = args.chemdcatap_version
+
+    if not dcatapplus_version and not chemdcatap_version:
         print(
-            "ERROR: provide either --to-version or --versions-url.",
+            "ERROR: nothing to do — provide at least one of: "
+            "--dcatapplus-version (or --versions-url), --chemdcatap-version.",
             file=sys.stderr,
         )
         return 1
 
-    changed = freeze_in_dir(schema_dir, args.prefix, args.from_alias, version)
+    # ------------------------------------------------------------------
+    # Process all YAML files in schema_dir
+    # ------------------------------------------------------------------
+    changed_files: list[str] = []
+    for yaml_file in sorted(schema_dir.glob("*.yaml")):
+        if process_file(
+            yaml_file,
+            args.dcatapplus_base,
+            dcatapplus_version,
+            args.chemdcatap_base,
+            chemdcatap_version,
+        ):
+            changed_files.append(yaml_file.name)
 
-    if changed:
-        old_token = f"{args.prefix}:{args.from_alias}/"
-        new_token = f"{args.prefix}:{version}/"
-        print(f"Froze '{old_token}' -> '{new_token}'")
-        print(f"Modified files: {', '.join(changed)}")
+    if changed_files:
+        print(f"Modified files: {', '.join(changed_files)}")
     else:
-        old_token = f"{args.prefix}:{args.from_alias}/"
-        print(f"Nothing to freeze: '{old_token}' not found in {schema_dir}")
+        print(f"No files changed in {schema_dir}")
 
-    # Emit version in a machine-parseable form for shell callers
-    print(f"FROZEN_VERSION={version}")
+    # ------------------------------------------------------------------
+    # Emit machine-parseable KEY=VALUE lines for shell callers
+    # ------------------------------------------------------------------
+    if dcatapplus_version:
+        print(f"FROZEN_VERSION={dcatapplus_version}")
+    if chemdcatap_version:
+        print(f"FROZEN_CHEMDCATAP_VERSION={chemdcatap_version}")
+
     return 0
 
 
