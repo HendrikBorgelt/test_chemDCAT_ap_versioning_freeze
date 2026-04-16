@@ -9,7 +9,7 @@ see_also:
 - https://github.com/HendrikBorgelt/DCAT-ap_as_LinkML_template/blob/main/src/dcatlinkml/schema/dcatlinkml.yaml
 - https://gitlab.com/opensourcelab/scientificdata/scidats/-/blob/feature/linkml-schemata/schemata/metadata_model_scidats_dcat_ap.yaml?ref_type=heads
 id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
-version: 0.4.2.post1.dev0+768dc8e
+version: 0.4.3.post1.dev0+68e7595
 imports:
 - linkml:types
 - dcatapplus:schema/dcat_ap_plus
@@ -20,7 +20,7 @@ license: CC-BY 4.0
 prefixes:
   chemdcatap:
     prefix_prefix: chemdcatap
-    prefix_reference: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
+    prefix_reference: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/
   dcatapplus:
     prefix_prefix: dcatapplus
     prefix_reference: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/v0.5.0/
@@ -6471,7 +6471,7 @@ slots:
 classes:
   SubstanceSampleCharacterizationDataset:
     name: SubstanceSampleCharacterizationDataset
-    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/SubstanceSampleCharacterizationDataset
+    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/SubstanceSampleCharacterizationDataset
     description: A Dataset about a SubstanceSample that was produced by a SubstanceSampleCharacterization
       activity. This is a coarse-grained convenience shape that conflates measurement
       and analysis into a single data-generating activity. Domain-specific sub-profiles
@@ -6539,7 +6539,7 @@ classes:
     class_uri: dcat:Dataset
   ReactionMonitoringDataset:
     name: ReactionMonitoringDataset
-    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/ReactionMonitoringDataset
+    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/ReactionMonitoringDataset
     description: A Dataset about a ChemicalReaction that was produced by a ReactionMonitoring
       activity. This is a coarse-grained convenience shape that conflates experimental
       documentation and analysis into a single data-generating activity. Domain-specific
@@ -6605,7 +6605,7 @@ classes:
     class_uri: dcat:Dataset
   SubstanceSampleCharacterization:
     name: SubstanceSampleCharacterization
-    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/SubstanceSampleCharacterization
+    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/SubstanceSampleCharacterization
     description: A DataGeneratingActivity that produces data about a SubstanceSample,
       such as a spectroscopic measurement, a physical property determination, or a
       combined measurement-and-analysis workflow. This is a coarse-grained convenience
@@ -6648,7 +6648,7 @@ classes:
     class_uri: prov:Activity
   ReactionMonitoring:
     name: ReactionMonitoring
-    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/ReactionMonitoring
+    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/ReactionMonitoring
     description: A DataGeneratingActivity that produces data about a ChemicalReaction,
       such as reaction monitoring, experimental documentation, or a combined recording-and-evaluation
       workflow. This is a coarse-grained convenience shape that does not distinguish
@@ -6689,7 +6689,7 @@ classes:
     class_uri: prov:Activity
   Laboratory:
     name: Laboratory
-    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/Laboratory
+    definition_uri: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/Laboratory
     description: A facility that provides controlled conditions in which scientific
       or technological research, experiments, and measurement may be performed.
     from_schema: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
@@ -9941,7 +9941,7 @@ classes:
     class_uri: qudt:Quantity
 metamodel_version: 1.7.0
 source_file: chem_dcat_ap.yaml
-source_file_date: '2026-04-16T19:20:09'
-source_file_size: 7646
-generation_date: '2026-04-16T19:20:20'
+source_file_date: '2026-04-16T19:52:02'
+source_file_size: 7636
+generation_date: '2026-04-16T19:52:13'
 
