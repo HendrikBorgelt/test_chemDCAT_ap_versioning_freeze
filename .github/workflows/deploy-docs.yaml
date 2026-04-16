@@ -59,53 +59,6 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev --no-progress
 
-      # -----------------------------------------------------------------------
-      # VERSION FREEZE (release tags only)
-      #
-      # Pins both prefix values to their concrete versions:
-      #
-      #   dcatapplus: {base}/          ->  dcatapplus: {base}/{upstream_latest}/
-      #   chemdcatap: {base}/chemistry/ -> chemdcatap: {base}/chemistry/{tag}/
-      #
-      # dcatapplus is normally already pinned on main (via the
-      # handle-upstream-release workflow), so the freeze is typically a no-op
-      # for dcatapplus. If for some reason it is still at the base URL the
-      # --versions-url flag ensures it gets pinned to the current upstream
-      # latest. The re-freeze logic in freeze_imports.py also handles the case
-      # where the prefix was already set to a previous version.
-      #
-      # All changes are applied to the working copy only — NOT committed to
-      # git. Source files stay in their development form; every released
-      # snapshot on GitHub Pages carries fully versioned, reproducible imports.
-      # -----------------------------------------------------------------------
-      - name: Freeze import prefixes to versioned forms
-        if: github.ref_type == 'tag' && github.event_name == 'push'
-        run: |
-          uv run python scripts/freeze_imports.py \
-            --schema-dir src/chem_dcat_ap/schema \
-            --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
-            --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \
-            --chemdcatap-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry \
-            --chemdcatap-version ${{ github.ref_name }}
-
-      # -----------------------------------------------------------------------
-      # POST-FREEZE VALIDATION (release tags only)
-      #
-      # Verifies that the frozen schema files are self-consistent before the
-      # docs are built and deployed.  Runs linkml-lint (gen-yaml) on each
-      # frozen schema to catch prefix mismatches or broken imports early.
-      # A failure here aborts the release without deploying partial docs.
-      # -----------------------------------------------------------------------
-      - name: Validate frozen schemas
-        if: github.ref_type == 'tag' && github.event_name == 'push'
-        run: |
-          echo "Validating frozen schema files..."
-          for f in src/chem_dcat_ap/schema/*.yaml; do
-            echo "  checking: $f"
-            uv run gen-yaml "$f" > /dev/null
-          done
-          echo "All frozen schemas are valid."
-
       - name: Generate schema documentation
         run: |
           just gen-doc
@@ -158,3 +111,185 @@ jobs:
           else
             echo "Keeping 'latest' as-is (current latest is a newer version)."
           fi
+
+  # -------------------------------------------------------------------------
+  # POST-DEPLOY FULL FREEZE & VALIDATION (release tags only)
+  #
+  # Runs AFTER build-docs so that Phase 1 (raw schemas) is already live on
+  # gh-pages — their versioned URLs now exist and CURIE imports can resolve.
+  #
+  # What this job does:
+  #   1. Apply FULL freeze to working copy (no commit to main):
+  #        a. chemdcatap: prefix → versioned gh-pages URL
+  #        b. dcatapplus: prefix → re-verify / re-freeze
+  #        c. id: fields → versioned gh-pages URL (all schemas)
+  #        d. Sub-schema own-namespace prefixes → versioned gh-pages URLs
+  #        e. Bare local imports → chemdcatap:schema/<name> CURIE form
+  #   2. Validate the fully-frozen schemas with gen-yaml.
+  #   3. Push frozen schemas to reference branch schema-release/{tag}
+  #      (always — even on failure — so maintainers can inspect).
+  #   4. On validation success: overwrite the raw gh-pages schema YAMLs with
+  #      the frozen versions so downstream consumers get fully-resolved files.
+  #   5. On failure: open a GitHub Issue to notify maintainers.
+  # -------------------------------------------------------------------------
+  post-deploy-validate:
+    runs-on: ubuntu-latest
+    needs: [build-docs]
+    if: github.ref_type == 'tag' && github.event_name == 'push'
+    permissions:
+      contents: write
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Configure git for the bot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7.3.1
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --dev --no-progress
+
+      # -----------------------------------------------------------------------
+      # Apply the full freeze to the working copy only (not committed to main).
+      # Converts bare local imports → CURIE form, versions all id: fields and
+      # own-namespace prefixes, and re-pins chemdcatap: / dcatapplus:.
+      # This is safe now because Phase 1 has already published the raw schemas
+      # at their versioned gh-pages URLs, so the CURIE imports can resolve.
+      # -----------------------------------------------------------------------
+      - name: Apply full freeze
+        run: |
+          uv run python scripts/freeze_imports.py \
+            --schema-dir src/chem_dcat_ap/schema \
+            --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
+            --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \
+            --chemdcatap-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry \
+            --chemdcatap-version ${{ github.ref_name }} \
+            --convert-bare-imports \
+            --schema-id-old-base https://w3id.org/nfdi-de/dcat-ap-plus \
+            --schema-id-new-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze
+
+      # -----------------------------------------------------------------------
+      # Validate the frozen schemas.  gen-yaml resolves all imports via the
+      # versioned gh-pages URLs — which now exist from Phase 1.
+      # -----------------------------------------------------------------------
+      - name: Validate fully-frozen schemas
+        id: validate
+        run: |
+          echo "Validating fully-frozen schema files..."
+          for f in src/chem_dcat_ap/schema/*.yaml; do
+            echo "  checking: $f"
+            uv run gen-yaml "$f" > /dev/null
+          done
+          echo "All frozen schemas are valid."
+
+      # -----------------------------------------------------------------------
+      # Push the frozen schemas to a reference branch for inspection.
+      # Runs always (even on validation failure) so maintainers can inspect
+      # the frozen state and debug any issues.
+      # -----------------------------------------------------------------------
+      - name: Push frozen schemas to reference branch
+        if: always()
+        run: |
+          BRANCH="schema-release/${{ github.ref_name }}"
+          git checkout -b "${BRANCH}"
+          git add src/chem_dcat_ap/schema/
+          git commit -m "chore: frozen schemas for ${{ github.ref_name }}
+
+          Full-freeze snapshot generated by the post-deploy-validate workflow.
+          Bare imports converted to CURIEs, id: and own-namespace prefixes
+          versioned to gh-pages URLs.
+
+          Source files on main are unchanged (development form retained)."
+          git push origin "${BRANCH}"
+
+      # -----------------------------------------------------------------------
+      # Overwrite the raw gh-pages schema YAMLs with the fully-frozen versions.
+      # Only runs on successful validation — a broken schema is never published
+      # as the canonical frozen version.
+      # -----------------------------------------------------------------------
+      - name: Overwrite gh-pages schema files with frozen versions
+        if: steps.validate.outcome == 'success'
+        run: |
+          # The frozen files are in the working tree (src/chem_dcat_ap/schema/).
+          # Save them before switching branches.
+          TMPDIR=$(mktemp -d)
+          cp src/chem_dcat_ap/schema/*.yaml "${TMPDIR}/"
+
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          TARGET_DIR="${{ github.ref_name }}/schema"
+          if [ ! -d "${TARGET_DIR}" ]; then
+            echo "ERROR: target directory '${TARGET_DIR}' not found on gh-pages."
+            exit 1
+          fi
+
+          cp "${TMPDIR}"/*.yaml "${TARGET_DIR}/"
+          git add "${TARGET_DIR}/"
+          git commit -m "chore: update frozen schema YAMLs for ${{ github.ref_name }}
+
+          Replaces raw Phase-1 schemas with fully-frozen versions (CURIEs,
+          versioned id: and prefix fields). Generated by post-deploy-validate."
+          git push origin gh-pages
+
+          git checkout -
+
+      # -----------------------------------------------------------------------
+      # Notify maintainers when validation fails.
+      # -----------------------------------------------------------------------
+      - name: Open issue on validation failure
+        if: failure()
+        run: |
+          gh issue create \
+            --title "Schema post-deploy validation failed for ${{ github.ref_name }}" \
+            --label "bug" \
+            --body "$(cat <<'EOF'
+          ## Post-deploy schema validation failed ❌
+
+          The fully-frozen schemas for **${{ github.ref_name }}** failed \`gen-yaml\`
+          validation after deploy.
+
+          **What to check:**
+          - Does the frozen schema have CURIE imports that resolve correctly?
+          - Are there breaking changes in the upstream dcat-ap-plus release?
+
+          **Reference branch for inspection:**
+          \`schema-release/${{ github.ref_name }}\` — contains the frozen schema
+          state at the time of failure.
+
+          The gh-pages schema files were **not** overwritten; the raw (Phase 1)
+          schemas remain live until this is resolved and a new release is made.
+
+          ---
+          *This issue was opened automatically by the \`post-deploy-validate\` job.*
+          EOF
+          )"
+
+      - name: Job summary
+        if: success()
+        run: |
+          echo "## Post-deploy validation passed ✅" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Fully-frozen schemas for **${{ github.ref_name }}** are now live on gh-pages." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Reference branch: \`schema-release/${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"

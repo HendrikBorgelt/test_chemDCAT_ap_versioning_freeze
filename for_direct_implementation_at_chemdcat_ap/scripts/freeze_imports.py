@@ -1,49 +1,68 @@
 #!/usr/bin/env python3
-"""Freeze LinkML schema imports to specific resolved versions.
+"""Freeze LinkML schema imports and identifiers to specific resolved versions.
 
-At release time the CI calls this script to:
+This script is called at two points in the release pipeline:
 
-1. Pin the ``dcatapplus`` prefix value from
-   ``dcatapplus: {base}/`` to ``dcatapplus: {base}/{version}/``
-   (version moves into the prefix URI, not the import path).
+PHASE 2  (post-deploy-validate job, after gh-pages deploy)
+---------------------------------------------------------------------------
+Full freeze — applies ALL transformations at once to the working copy:
 
-2. Strip any version/alias segment from ``dcatapplus:`` import paths
-   e.g. ``dcatapplus:latest/schema/`` -> ``dcatapplus:schema/``
+  1. Pin the ``dcatapplus`` prefix value:
+       dcatapplus: {base}/          ->  dcatapplus: {base}/{version}/
+       (also handles re-freeze: dcatapplus: {base}/vOLD/ -> {base}/vNEW/)
 
-3. Pin the ``chemdcatap`` prefix value from
-   ``chemdcatap: {base}/`` to ``chemdcatap: {base}/{version}/``
+  2. Strip any version/alias token from ``dcatapplus:`` import paths:
+       dcatapplus:latest/schema/X   ->  dcatapplus:schema/X
 
-4. Convert bare local sub-module imports to ``chemdcatap:schema/`` imports
-   e.g. ``  - chemical_entities_ap`` -> ``  - chemdcatap:schema/chemical_entities_ap``
+  3. Pin the ``chemdcatap`` prefix value:
+       chemdcatap: {base}/          ->  chemdcatap: {base}/{version}/
 
-The modifications are made to the *working copy only* — they are **not**
-committed back to git. Source files stay in their development form
-(bare imports, unversioned prefix) while every released GitHub Pages
-snapshot carries fully versioned, reproducible imports.
+  4. Convert bare local sub-module imports to ``chemdcatap:schema/`` form:
+       - chemical_entities_ap       ->  - chemdcatap:schema/chemical_entities_ap
+     (enabled via --convert-bare-imports; only safe after Phase 1 deploy
+      because the versioned CURIE URLs must already exist on gh-pages)
 
-Usage (auto-resolve dcatapplus version via mike versions.json,
-       freeze chemdcatap to the current release tag):
+  5. Remap and version all ``id:`` fields:
+       id: {old_id_base}/path/      ->  id: {new_id_base}/path/{version}/
+
+  6. Remap and version own-namespace prefix declarations:
+       my_ns: {old_id_base}/path/   ->  my_ns: {new_id_base}/path/{version}/
+
+The modifications are made to the *working copy only* -- they are NOT
+committed back to git. Source files stay in their development form on main
+(bare imports, unversioned prefixes). Released GitHub Pages snapshots carry
+fully versioned, reproducible imports.
+
+HANDLE-UPSTREAM-RELEASE workflow
+---------------------------------------------------------------------------
+Only steps 1-2 are invoked (with --dcatapplus-base + --dcatapplus-version,
+no --convert-bare-imports, no --schema-id-*) to pin dcatapplus on main.
+
+Usage examples
+--------------
+Full post-deploy freeze (Phase 2) — production:
 
     uv run python scripts/freeze_imports.py \\
         --schema-dir src/chem_dcat_ap/schema \\
         --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \\
-        --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \\
-        --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \\
-        --chemdcatap-version v0.2.0
+        --versions-url https://nfdi-de.github.io/dcat-ap-plus/versions.json \\
+        --chemdcatap-base https://nfdi-de.github.io/chem-dcat-ap/chemistry \\
+        --chemdcatap-version v0.5.0 \\
+        --convert-bare-imports \\
+        --schema-id-old-base https://w3id.org/nfdi-de/dcat-ap-plus \\
+        --schema-id-new-base https://w3id.org/nfdi-de/dcat-ap-plus
 
-Usage (explicit dcatapplus version, no chemdcatap freeze):
+Upstream-release pin only (handle-upstream-release workflow):
 
     uv run python scripts/freeze_imports.py \\
         --schema-dir src/chem_dcat_ap/schema \\
         --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \\
-        --dcatapplus-version v0.3.0
+        --dcatapplus-version v0.5.0
 
 Exit codes
 ----------
-0  Success. Machine-parseable KEY=VALUE lines are printed on stdout:
-     FROZEN_VERSION=<dcatapplus_version>           (if dcatapplus was frozen)
-     FROZEN_CHEMDCATAP_VERSION=<chemdcatap_version> (if chemdcatap was frozen)
-1  Error — details on stderr.
+0  Success.
+1  Error -- details on stderr.
 """
 
 import argparse
@@ -112,7 +131,7 @@ def strip_dcatapplus_import_path_token(text: str) -> str:
       - dcatapplus:v0.3.0/schema/foo  -> dcatapplus:schema/foo
 
     Only matches when there is a token (non-colon, non-slash chars) between
-    'dcatapplus:' and '/schema/' — does not touch lines already in the
+    'dcatapplus:' and '/schema/' -- does not touch lines already in the
     'dcatapplus:schema/' form.
     """
     return re.sub(r"dcatapplus:[^:/\s]+/schema/", "dcatapplus:schema/", text)
@@ -122,13 +141,22 @@ def freeze_chemdcatap_prefix(text: str, base: str, version: str) -> str:
     """Pin the chemdcatap prefix value: base/ -> base/version/
 
     Replaces lines like:
-      chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
+      chemdcatap: https://nfdi-de.github.io/chem-dcat-ap/chemistry/
     with:
-      chemdcatap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/v0.2.0/
+      chemdcatap: https://nfdi-de.github.io/chem-dcat-ap/chemistry/v0.2.0/
+
+    Also handles re-freeze from a previously versioned value.
     """
-    old = f"chemdcatap: {base}/\n"
     new = f"chemdcatap: {base}/{version}/\n"
-    return text.replace(old, new)
+    old_base = f"chemdcatap: {base}/\n"
+    if old_base in text:
+        return text.replace(old_base, new)
+    # Fallback: replace already-versioned form
+    return re.sub(
+        r"chemdcatap: " + re.escape(base) + r"/[^/\s]+/\n",
+        new,
+        text,
+    )
 
 
 def convert_bare_imports_to_chemdcatap(text: str) -> str:
@@ -142,6 +170,10 @@ def convert_bare_imports_to_chemdcatap(text: str) -> str:
     Only YAML list item lines (2-6 leading spaces, then '- ') whose value
     part contains no colon and no slash are converted. The special name
     'linkml:types' is never touched (it already has a colon).
+
+    NOTE: this transformation is only safe to run AFTER the schemas have
+    been deployed to gh-pages, because the CURIE URLs must already exist
+    at the versioned path. Enable via --convert-bare-imports.
     """
     lines = text.splitlines(keepends=True)
     result = []
@@ -149,12 +181,77 @@ def convert_bare_imports_to_chemdcatap(text: str) -> str:
         # Match lines: 2-6 spaces + '- ' + bare name (letters/digits/underscores/hyphens)
         m = re.match(r'^( {2,6}- )([A-Za-z][A-Za-z0-9_-]+)(\s*)$', line)
         if m and ':' not in m.group(2) and '/' not in m.group(2):
-            result.append(f"{m.group(1)}chemdcatap:schema/{m.group(2)}{m.group(3)}\n"
-                          if not line.endswith('\n')
-                          else f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n")
+            result.append(
+                f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n"
+            )
         else:
             result.append(line)
     return "".join(result)
+
+
+def freeze_schema_id(text: str, old_base: str, new_base: str, version: str) -> str:
+    """Remap and version the ``id:`` field of a schema.
+
+    Replaces any line of the form:
+      id: {old_base}{suffix}/
+
+    with:
+      id: {new_base}{suffix}/{version}/
+
+    For example, with old_base=new_base=https://w3id.org/nfdi-de/dcat-ap-plus,
+    version=v0.5.0:
+
+      id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/
+      -> id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/v0.5.0/
+
+      id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
+      -> id: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/v0.5.0/
+
+    When old_base == new_base (standard production case) the function simply
+    inserts the version token without changing the base URL.
+    """
+    def _replace(m: re.Match) -> str:
+        suffix = m.group(1).rstrip("/")   # e.g. "/chemistry" or "/chemistry/entity"
+        return f"id: {new_base}{suffix}/{version}/"
+
+    return re.sub(
+        r"^id: " + re.escape(old_base) + r"(/[^\n]*/)$",
+        _replace,
+        text,
+        flags=re.MULTILINE,
+    )
+
+
+def freeze_own_namespace_prefixes(
+    text: str, old_base: str, new_base: str, version: str
+) -> str:
+    """Remap and version sub-schema own-namespace prefix declarations.
+
+    Matches any indented prefix line (two leading spaces) whose value
+    starts with ``old_base`` and ends with ``/``, EXCEPT the reserved
+    names ``chemdcatap`` and ``dcatapplus`` (handled separately).
+
+    For example (production, old_base == new_base == w3id.org base):
+      chemical_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
+      -> chemical_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/v0.5.0/
+
+      material_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/materials/
+      -> material_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/materials/v0.5.0/
+    """
+    def _replace(m: re.Match) -> str:
+        prefix_name = m.group(1)
+        suffix = m.group(2).rstrip("/")   # e.g. "/chemistry/entity"
+        return f"  {prefix_name}: {new_base}{suffix}/{version}/"
+
+    # Exclude chemdcatap and dcatapplus — they are frozen by their own functions
+    return re.sub(
+        r"^  (?!chemdcatap|dcatapplus)([A-Za-z][A-Za-z0-9_-]*): "
+        + re.escape(old_base)
+        + r"(/[^\n]*/)$",
+        _replace,
+        text,
+        flags=re.MULTILINE,
+    )
 
 
 def process_file(
@@ -163,22 +260,39 @@ def process_file(
     dcatapplus_version: str | None,
     chemdcatap_base: str | None,
     chemdcatap_version: str | None,
+    convert_bare: bool,
+    schema_id_old_base: str | None,
+    schema_id_new_base: str | None,
 ) -> bool:
     """Apply all requested freezes to one file. Returns True if the file changed."""
     text = yaml_file.read_text(encoding="utf-8")
     original = text
 
+    # 1. Pin dcatapplus prefix + strip import path token
     if dcatapplus_base and dcatapplus_version:
         text = freeze_dcatapplus_prefix(text, dcatapplus_base, dcatapplus_version)
         text = strip_dcatapplus_import_path_token(text)
 
+    # 2. Pin chemdcatap prefix
     if chemdcatap_base and chemdcatap_version:
         text = freeze_chemdcatap_prefix(text, chemdcatap_base, chemdcatap_version)
-        # NOTE: bare local imports (e.g. `- chemical_entities_ap`) are intentionally
-        # kept as-is. Converting them to chemdcatap:schema/ URL form causes a circular
-        # dependency during the release build: the versioned URL doesn't exist until
-        # AFTER this very build completes. Co-deployed sub-schemas in the same versioned
-        # directory resolve correctly via bare relative names, so this is correct.
+
+    # 3. Convert bare local imports to chemdcatap:schema/ form
+    #    Only safe after Phase 1 deploy (versioned URLs must already exist).
+    if convert_bare and chemdcatap_base and chemdcatap_version:
+        text = convert_bare_imports_to_chemdcatap(text)
+
+    # 4. Remap + version id: field
+    if schema_id_old_base and schema_id_new_base and chemdcatap_version:
+        text = freeze_schema_id(
+            text, schema_id_old_base, schema_id_new_base, chemdcatap_version
+        )
+
+    # 5. Remap + version own-namespace prefixes
+    if schema_id_old_base and schema_id_new_base and chemdcatap_version:
+        text = freeze_own_namespace_prefixes(
+            text, schema_id_old_base, schema_id_new_base, chemdcatap_version
+        )
 
     if text != original:
         yaml_file.write_text(text, encoding="utf-8")
@@ -200,6 +314,7 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Directory containing the schema YAML files to update.",
     )
+    # --- dcatapplus ---
     p.add_argument(
         "--dcatapplus-base",
         default=None,
@@ -217,11 +332,21 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     p.add_argument(
+        "--versions-url",
+        default=None,
+        help=(
+            "URL to the mike versions.json of the upstream dcat-ap-plus repo. "
+            "Used to auto-resolve the 'latest' alias when --dcatapplus-version "
+            "is not given."
+        ),
+    )
+    # --- chemdcatap ---
+    p.add_argument(
         "--chemdcatap-base",
         default=None,
         help=(
             "Base URL for the chemdcatap prefix, no trailing slash. "
-            "e.g. https://w3id.org/nfdi-de/dcat-ap-plus/chemistry"
+            "e.g. https://nfdi-de.github.io/chem-dcat-ap/chemistry"
         ),
     )
     p.add_argument(
@@ -229,13 +354,35 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Version to pin chemdcatap to (e.g. the current release tag 'v0.2.0').",
     )
+    # --- bare import conversion ---
     p.add_argument(
-        "--versions-url",
+        "--convert-bare-imports",
+        action="store_true",
+        default=False,
+        help=(
+            "Convert bare local sub-module imports to chemdcatap:schema/ CURIE form. "
+            "Only safe to run AFTER the schemas have been deployed to gh-pages "
+            "(Phase 2 / post-deploy-validate job), because the CURIE URLs must "
+            "already exist at the versioned path."
+        ),
+    )
+    # --- id: and own-namespace remapping ---
+    p.add_argument(
+        "--schema-id-old-base",
         default=None,
         help=(
-            "URL to the mike versions.json of the upstream dcat-ap-plus repo. "
-            "Used to auto-resolve the 'latest' alias when --dcatapplus-version "
-            "is not given."
+            "Base URL currently used in schema id: fields and own-namespace prefixes. "
+            "e.g. https://w3id.org/nfdi-de/dcat-ap-plus  "
+            "Will be replaced with --schema-id-new-base and the version injected."
+        ),
+    )
+    p.add_argument(
+        "--schema-id-new-base",
+        default=None,
+        help=(
+            "Replacement base URL for schema id: fields and own-namespace prefixes. "
+            "For production use, set this to the same value as --schema-id-old-base "
+            "(w3id.org) so only the version is injected without changing the base URL."
         ),
     )
     return p
@@ -247,6 +394,36 @@ def main() -> int:
     schema_dir = Path(args.schema_dir)
     if not schema_dir.is_dir():
         print(f"ERROR: not a directory: {schema_dir}", file=sys.stderr)
+        return 1
+
+    # ------------------------------------------------------------------
+    # Validate argument combinations
+    # ------------------------------------------------------------------
+    if args.schema_id_old_base and not args.schema_id_new_base:
+        print(
+            "ERROR: --schema-id-old-base requires --schema-id-new-base.",
+            file=sys.stderr,
+        )
+        return 1
+    if args.schema_id_new_base and not args.schema_id_old_base:
+        print(
+            "ERROR: --schema-id-new-base requires --schema-id-old-base.",
+            file=sys.stderr,
+        )
+        return 1
+    if args.schema_id_old_base and not args.chemdcatap_version:
+        print(
+            "ERROR: --schema-id-old-base requires --chemdcatap-version "
+            "(used as the version token for id: and namespace prefix freeze).",
+            file=sys.stderr,
+        )
+        return 1
+    if args.convert_bare_imports and not (args.chemdcatap_base and args.chemdcatap_version):
+        print(
+            "ERROR: --convert-bare-imports requires --chemdcatap-base and "
+            "--chemdcatap-version (needed to form the chemdcatap:schema/ CURIE).",
+            file=sys.stderr,
+        )
         return 1
 
     # ------------------------------------------------------------------
@@ -274,10 +451,18 @@ def main() -> int:
 
     chemdcatap_version: str | None = args.chemdcatap_version
 
-    if not dcatapplus_version and not chemdcatap_version:
+    # Require at least one operation
+    has_work = (
+        bool(dcatapplus_version)
+        or bool(chemdcatap_version)
+        or args.convert_bare_imports
+        or bool(args.schema_id_old_base)
+    )
+    if not has_work:
         print(
-            "ERROR: nothing to do — provide at least one of: "
-            "--dcatapplus-version (or --versions-url), --chemdcatap-version.",
+            "ERROR: nothing to do -- provide at least one of: "
+            "--dcatapplus-version (or --versions-url), --chemdcatap-version, "
+            "--convert-bare-imports, --schema-id-old-base.",
             file=sys.stderr,
         )
         return 1
@@ -289,10 +474,13 @@ def main() -> int:
     for yaml_file in sorted(schema_dir.glob("*.yaml")):
         if process_file(
             yaml_file,
-            args.dcatapplus_base,
-            dcatapplus_version,
-            args.chemdcatap_base,
-            chemdcatap_version,
+            dcatapplus_base=args.dcatapplus_base,
+            dcatapplus_version=dcatapplus_version,
+            chemdcatap_base=args.chemdcatap_base,
+            chemdcatap_version=chemdcatap_version,
+            convert_bare=args.convert_bare_imports,
+            schema_id_old_base=args.schema_id_old_base,
+            schema_id_new_base=args.schema_id_new_base,
         ):
             changed_files.append(yaml_file.name)
 
