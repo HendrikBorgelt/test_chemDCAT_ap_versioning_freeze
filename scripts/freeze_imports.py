@@ -160,7 +160,11 @@ def process_file(
 
     if chemdcatap_base and chemdcatap_version:
         text = freeze_chemdcatap_prefix(text, chemdcatap_base, chemdcatap_version)
-        text = convert_bare_imports_to_chemdcatap(text)
+        # NOTE: bare local imports (e.g. `- chemical_entities_ap`) are intentionally
+        # kept as-is. Converting them to chemdcatap:schema/ URL form causes a circular
+        # dependency during the release build: the versioned URL doesn't exist until
+        # AFTER this very build completes. Co-deployed sub-schemas in the same versioned
+        # directory resolve correctly via bare relative names, so this is correct.
 
     if text != original:
         yaml_file.write_text(text, encoding="utf-8")
