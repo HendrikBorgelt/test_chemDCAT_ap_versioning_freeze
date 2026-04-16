@@ -8,7 +8,7 @@ license: CC-BY 4.0
 prefixes:
   chemical_reaction_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/reaction/
   chemdcatap: https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/
-  dcatapplus: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/
+  dcatapplus: https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/v0.5.0/
   linkml: https://w3id.org/linkml/
   biolink: https://w3id.org/biolink/vocab/
   schema: http://schema.org/
@@ -52,7 +52,7 @@ default_prefix: chemical_reaction_ap
 default_range: string
 imports:
   - linkml:types
-  - dcatapplus:latest/schema/dcat_ap_plus
+  - dcatapplus:schema/dcat_ap_plus
   - chemical_entities_ap
 
 classes:
