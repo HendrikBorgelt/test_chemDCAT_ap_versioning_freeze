@@ -170,11 +170,44 @@ jobs:
         run: uv sync --dev --no-progress
 
       # -----------------------------------------------------------------------
+      # Wait for GitHub Pages to serve the Phase 1 schemas before running
+      # the full freeze and validation.  GitHub can take several minutes to
+      # rebuild gh-pages after a branch push — polling is safer than a fixed
+      # sleep and gives earlier exit on fast deploys.
+      #
+      # We probe the top-level schema file for this release tag, which is the
+      # last file written by mike deploy and therefore a reliable "done" signal.
+      # Polls every 30 s, times out after 10 minutes (20 attempts).
+      # -----------------------------------------------------------------------
+      - name: Wait for gh-pages deploy to be live
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          PROBE_URL="https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/${VERSION}/schema/chem_dcat_ap.yaml"
+          echo "Polling for: ${PROBE_URL}"
+          for i in $(seq 1 20); do
+            if curl --silent --fail --max-time 10 "${PROBE_URL}" > /dev/null 2>&1; then
+              echo "gh-pages is live (attempt ${i})."
+              exit 0
+            fi
+            echo "  Not yet available — waiting 30 s (attempt ${i}/20)..."
+            sleep 30
+          done
+          echo "ERROR: gh-pages did not become available within 10 minutes." >&2
+          exit 1
+
+      # -----------------------------------------------------------------------
       # Apply the full freeze to the working copy only (not committed to main).
       # Converts bare local imports → CURIE form, versions all id: fields and
       # own-namespace prefixes, and re-pins chemdcatap: / dcatapplus:.
-      # This is safe now because Phase 1 has already published the raw schemas
-      # at their versioned gh-pages URLs, so the CURIE imports can resolve.
+      #
+      # NOTE — chemdcatap base URL:
+      # mike deploys schema files to /{version}/schema/ at the gh-pages root,
+      # so the chemdcatap prefix must resolve to that path.  The base is the
+      # repo root (no /chemistry suffix), giving:
+      #   chemdcatap: https://.../{version}/
+      #   chemdcatap:schema/chemical_entities_ap
+      #     -> https://.../{version}/schema/chemical_entities_ap.yaml  ✓
       # -----------------------------------------------------------------------
       - name: Apply full freeze
         run: |
@@ -182,7 +215,7 @@ jobs:
             --schema-dir src/chem_dcat_ap/schema \
             --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
             --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \
-            --chemdcatap-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry \
+            --chemdcatap-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze \
             --chemdcatap-version ${{ github.ref_name }} \
             --convert-bare-imports \
             --schema-id-old-base https://w3id.org/nfdi-de/dcat-ap-plus \
