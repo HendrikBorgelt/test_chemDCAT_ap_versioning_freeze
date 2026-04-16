@@ -217,7 +217,7 @@ jobs:
 
           uv run python scripts/freeze_imports.py \
             --schema-dir src/chem_dcat_ap/schema \
-            --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \
+            --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
             --dcatapplus-version "${VERSION}"
 
           git add src/chem_dcat_ap/schema/

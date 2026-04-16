@@ -77,9 +77,9 @@ jobs:
         run: |
           uv run python scripts/freeze_imports.py \
             --schema-dir src/chem_dcat_ap/schema \
-            --dcatapplus-base https://w3id.org/nfdi-de/dcat-ap-plus \
+            --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
             --versions-url https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze/versions.json \
-            --chemdcatap-base https://w3id.org/nfdi-de/dcat-ap-plus/chemistry \
+            --chemdcatap-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry \
             --chemdcatap-version ${{ github.ref_name }}
 
       - name: Generate schema documentation
