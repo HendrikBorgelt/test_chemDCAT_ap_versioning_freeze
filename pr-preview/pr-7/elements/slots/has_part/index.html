@@ -353,6 +353,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../about/" class="md-nav__link">
         
   
@@ -525,43 +552,13 @@ Alias: has_part</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../../classes/Catalyst/">Catalyst</a></td>
-<td>A ChemicalSubstance or MaterialEntity that initiates or accelerates a ChemicalReaction without itself being affected.</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../../classes/Activity/">Activity</a></td>
-<td>See <a href="https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Activity">DCAT-AP specs:Activity</a></td>
-<td>yes</td>
-</tr>
-<tr>
-<td><a href="../../classes/DataAnalysis/">DataAnalysis</a></td>
-<td>An Activity that evaluates the data produced by another Activity.</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../../classes/AnalysisSourceData/">AnalysisSourceData</a></td>
-<td>Information that was evaluated within a DataAnalysis.</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../../classes/SubstanceSample/">SubstanceSample</a></td>
-<td>A MaterialSample derived from a chemical substance that is of interest in an analytical procedure.</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../../classes/Device/">Device</a></td>
-<td>A material instrument that is designed to perform a function primarily by means of its mechanical or electrical nature.</td>
-<td>yes</td>
-</tr>
-<tr>
 <td><a href="../../classes/Software/">Software</a></td>
 <td>An instrument composed of a series of instructions that can be interpreted by or directly executed by a computer.</td>
 <td>yes</td>
 </tr>
 <tr>
-<td><a href="../../classes/ChemicalProduct/">ChemicalProduct</a></td>
-<td>A chemical substance that is produced by a ChemicalReaction.</td>
+<td><a href="../../classes/SubstanceSampleCharacterization/">SubstanceSampleCharacterization</a></td>
+<td>A DataGeneratingActivity that produces data about a SubstanceSample, such as a spectroscopic measurement, a physical property determination, or a combined measurement-and-analysis workflow. This is a coarse-grained convenience shape that does not distinguish between raw data acquisition and subsequent data processing or analysis. Domain-specific sub-profiles that need this distinction should define their own DataGeneratingActivity subclasses and use the DCAT-AP+ DataAnalysis chain to separate raw measurement from derived results.</td>
 <td>no</td>
 </tr>
 <tr>
@@ -570,8 +567,18 @@ Alias: has_part</p>
 <td>yes</td>
 </tr>
 <tr>
-<td><a href="../../classes/DissolvingSubstance/">DissolvingSubstance</a></td>
-<td>A liquid ChemicalSubstance that dissolves or that is capable of dissolving a ChemicalSubstance.</td>
+<td><a href="../../classes/ChemicalReaction/">ChemicalReaction</a></td>
+<td>A process that leads to the transformation of one set of chemical substances to another and that is the subject matter of a DataGeneratingActivity.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/Activity/">Activity</a></td>
+<td>See <a href="https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Activity">DCAT-AP specs:Activity</a></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><a href="../../classes/EvaluatedEntity/">EvaluatedEntity</a></td>
+<td>An Entity that is being evaluated in a DataGeneratingActivity.</td>
 <td>no</td>
 </tr>
 <tr>
@@ -580,23 +587,18 @@ Alias: has_part</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../../classes/PolymerSample/">PolymerSample</a></td>
-<td>A SubstanceSample derived from a Polymer.</td>
+<td><a href="../../classes/Catalyst/">Catalyst</a></td>
+<td>A ChemicalSubstance or MaterialEntity that initiates or accelerates a ChemicalReaction without itself being affected.</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../../classes/EvaluatedActivity/">EvaluatedActivity</a></td>
-<td>An activity or process that is being evaluated in a DataGeneratingActivity.</td>
+<td><a href="../../classes/Atom/">Atom</a></td>
+<td>An Entity constituting the smallest component of a chemical element having the chemical properties of the element.</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../../classes/ChemicalReaction/">ChemicalReaction</a></td>
-<td>A process that leads to the transformation of one set of chemical substances to another and that is the subject matter of a DataGeneratingActivity.</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../../classes/DataGeneratingActivity/">DataGeneratingActivity</a></td>
-<td>An Activity (process) that has the objective to produce information (in form of a dataset) about another Activity or Entity.</td>
+<td><a href="../../classes/SubstanceSample/">SubstanceSample</a></td>
+<td>A MaterialSample derived from a chemical substance that is of interest in an analytical procedure.</td>
 <td>no</td>
 </tr>
 <tr>
@@ -605,9 +607,29 @@ Alias: has_part</p>
 <td>yes</td>
 </tr>
 <tr>
-<td><a href="../../classes/Atom/">Atom</a></td>
-<td>A MaterialEntity constituting the smallest component of an element having the chemical properties of the element.</td>
+<td><a href="../../classes/DataGeneratingActivity/">DataGeneratingActivity</a></td>
+<td>An Activity (process) that has the objective to produce information (in form of a dataset) about another Activity or Entity.</td>
 <td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/DataAnalysis/">DataAnalysis</a></td>
+<td>An Activity that evaluates the data produced by another Activity.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/ReactionMonitoring/">ReactionMonitoring</a></td>
+<td>A DataGeneratingActivity that produces data about a ChemicalReaction, such as reaction monitoring, experimental documentation, or a combined recording-and-evaluation workflow. This is a coarse-grained convenience shape that does not distinguish between raw experimental recording and subsequent data evaluation. Domain-specific sub-profiles that need this distinction should define their own DataGeneratingActivity subclasses and use the DCAT-AP+ DataAnalysis chain to separate raw data from derived results.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/EvaluatedActivity/">EvaluatedActivity</a></td>
+<td>An activity or process that is being evaluated in a DataGeneratingActivity.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/MaterialEntity/">MaterialEntity</a></td>
+<td>A material is an Entity that has some portion of matter as proper part.</td>
+<td>yes</td>
 </tr>
 <tr>
 <td><a href="../../classes/StartingMaterial/">StartingMaterial</a></td>
@@ -617,6 +639,16 @@ Alias: has_part</p>
 <tr>
 <td><a href="../../classes/ChemicalEntity/">ChemicalEntity</a></td>
 <td>Any constitutionally or isotopically distinct atom, molecule, ion, ion pair, radical, radical ion, complex, conformer etc., identifiable as a separately distinguishable entity.</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><a href="../../classes/AnalysisSourceData/">AnalysisSourceData</a></td>
+<td>Information that was evaluated within a DataAnalysis.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/Reactor/">Reactor</a></td>
+<td>A reactor is a container for controlling a biological or chemical reaction or process.</td>
 <td>no</td>
 </tr>
 <tr>
@@ -625,13 +657,18 @@ Alias: has_part</p>
 <td>yes</td>
 </tr>
 <tr>
-<td><a href="../../classes/MaterialEntity/">MaterialEntity</a></td>
-<td>A material is an Entity that has some portion of matter as proper part.</td>
-<td>yes</td>
+<td><a href="../../classes/ChemicalProduct/">ChemicalProduct</a></td>
+<td>A chemical substance that is produced by a ChemicalReaction.</td>
+<td>no</td>
 </tr>
 <tr>
-<td><a href="../../classes/Reactor/">Reactor</a></td>
-<td>A reactor is a container for controlling a biological or chemical reaction or process.</td>
+<td><a href="../../classes/PolymerSample/">PolymerSample</a></td>
+<td>A SubstanceSample derived from a Polymer.</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../../classes/DissolvingSubstance/">DissolvingSubstance</a></td>
+<td>A liquid ChemicalSubstance that dissolves or that is capable of dissolving a ChemicalSubstance.</td>
 <td>no</td>
 </tr>
 <tr>
@@ -640,9 +677,9 @@ Alias: has_part</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../../classes/EvaluatedEntity/">EvaluatedEntity</a></td>
-<td>An Entity that is being evaluated in a DataGeneratingActivity.</td>
-<td>no</td>
+<td><a href="../../classes/Device/">Device</a></td>
+<td>A material instrument that is designed to perform a function primarily by means of its mechanical or electrical nature.</td>
+<td>yes</td>
 </tr>
 </tbody>
 </table>
@@ -653,7 +690,7 @@ Alias: has_part</p>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
-<li>from schema: https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/</li>
+<li>from schema: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/</li>
 </ul>
 <h2 id="mappings">Mappings</h2>
 <table>
@@ -679,7 +716,7 @@ Alias: has_part</p>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">has_part</span>
 <span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">This slot is described in more detail within the class in which it is</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">used.</span>
-<span class="nt">from_schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://hendrikborgelt.github.io/test_chemDCAT_ap_versioning_freeze/chemistry/</span>
+<span class="nt">from_schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/</span>
 <span class="nt">rank</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <span class="nt">slot_uri</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dcterms:hasPart</span>
 <span class="nt">alias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">has_part</span>
