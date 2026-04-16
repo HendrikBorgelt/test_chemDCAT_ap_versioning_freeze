@@ -100,7 +100,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to compatibility.md — nothing to commit."
           else
-            git commit -m "chore: update schema compatibility matrix [skip ci]"
+            git commit -m "chore: update schema compatibility matrix"
             git push origin main
             echo "Committed updated compatibility.md to main."
           fi
