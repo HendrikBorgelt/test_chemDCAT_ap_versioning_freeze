@@ -61,6 +61,9 @@ jobs:
 
       # gen-doc runs on the raw (development) schemas — bare local imports
       # resolve against the local file system, so no URLs are needed here.
+      # NOTE: gen-doc also calls _add-artifacts which copies the raw source
+      # YAMLs into docs/schema/.  The freeze step below overwrites those copies
+      # with the frozen versions before mike deploy picks them up.
       - name: Generate schema documentation
         run: |
           just gen-doc
@@ -91,6 +94,12 @@ jobs:
       - name: Freeze schemas for release
         if: github.ref_type == 'tag' && github.event_name == 'push'
         run: |
+          echo "=== Schema prefix/import lines BEFORE freeze ==="
+          for f in src/chem_dcat_ap/schema/*.yaml; do
+            echo "--- $(basename $f) ---"
+            grep -E '^\s+(chemdcatap|dcatapplus):|^id:|^imports:|\s+- ' "$f" | head -20
+          done
+
           uv run python scripts/freeze_imports.py \
             --schema-dir src/chem_dcat_ap/schema \
             --dcatapplus-base https://HendrikBorgelt.github.io/test_dcat_ap_plus_versioning_freeze \
@@ -100,6 +109,21 @@ jobs:
             --convert-bare-imports \
             --schema-id-old-base https://w3id.org/nfdi-de/dcat-ap-plus \
             --schema-id-new-base https://HendrikBorgelt.github.io/test_chemDCAT_ap_versioning_freeze
+
+          echo "=== Schema prefix/import lines AFTER freeze ==="
+          for f in src/chem_dcat_ap/schema/*.yaml; do
+            echo "--- $(basename $f) ---"
+            grep -E '^\s+(chemdcatap|dcatapplus):|^id:|^imports:|\s+- ' "$f" | head -20
+          done
+
+          # gen-doc (_add-artifacts) already copied the raw source YAMLs into
+          # docs/schema/ before this step ran.  Overwrite those stale copies
+          # with the freshly frozen versions so mike deploy publishes the right
+          # files to gh-pages.
+          echo "=== Updating docs/schema/ with frozen versions ==="
+          cp src/chem_dcat_ap/schema/*.yaml docs/schema/
+          echo "docs/schema/ now contains:"
+          grep -E '^\s+(chemdcatap|dcatapplus):|^id:|^imports:|\s+- ' docs/schema/*.yaml | head -60
 
       # The if-conditions below make sure to select the right step, depending
       # on the job trigger. Only one of the steps below will run at a time.
