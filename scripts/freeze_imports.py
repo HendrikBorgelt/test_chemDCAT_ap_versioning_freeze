@@ -159,24 +159,39 @@ def freeze_chemdcatap_prefix(text: str, base: str, version: str) -> str:
     )
 
 
-def convert_bare_imports_to_chemdcatap(text: str) -> str:
-    """Convert bare local sub-module imports to chemdcatap-prefixed form.
+def convert_bare_imports(text: str) -> str:
+    """Convert bare local sub-module imports to prefixed CURIE form.
 
-    A bare import line looks like:
-      - chemical_entities_ap
-    and becomes:
-      - chemdcatap:schema/chemical_entities_ap
+    For each bare import name, checks whether a matching named prefix is
+    declared in the schema. If so, uses that prefix as the CURIE namespace:
+      - chemical_entities_ap  ->  - chemical_entities_ap:schema/chemical_entities_ap
+
+    If no matching prefix is declared, falls back to the chemdcatap: prefix:
+      - chemical_entities_ap  ->  - chemdcatap:schema/chemical_entities_ap
+
+    This handles two deployment scenarios:
+
+    - Production (w3id.org): each sub-schema has its own prefix pointing to
+      a distinct w3id path (chemistry/entity/, chemistry/reaction/, etc.).
+      Using that prefix ensures the CURIE resolves to the correct w3id URL.
+      The sub-module prefix declarations must exist in the source schema:
+        chemical_entities_ap: https://w3id.org/nfdi-de/dcat-ap-plus/chemistry/entity/
+
+    - Test repo: all sub-schemas are deployed under a single chemdcatap: path,
+      so no individual prefix is declared and the chemdcatap: fallback is used.
 
     Only items inside the top-level ``imports:`` block are converted.
-    Class-level slot lists, mixin lists, etc. are left untouched even
-    though they are also YAML list items with bare names.
+    Class-level slot lists, mixin lists, etc. are left untouched.
+    Already-prefixed imports (containing ':') are never touched.
 
-    The special import ``linkml:types`` is never touched (already a CURIE).
-
-    NOTE: this transformation is only safe to run AFTER the schemas have
-    been deployed to gh-pages, because the CURIE URLs must already exist
-    at the versioned path. Enable via --convert-bare-imports.
+    NOTE: only safe to run AFTER the schemas have been deployed to gh-pages,
+    because the resolved CURIE URLs must already exist at the versioned path.
+    Enable via --convert-bare-imports.
     """
+    # Collect all declared prefix names so we can pick the right CURIE namespace
+    # for each bare import (two-space-indented prefix declarations).
+    declared_prefixes = set(re.findall(r'^  ([A-Za-z][A-Za-z0-9_-]*):', text, re.MULTILINE))
+
     lines = text.splitlines(keepends=True)
     result = []
     in_imports_block = False
@@ -197,7 +212,9 @@ def convert_bare_imports_to_chemdcatap(text: str) -> str:
         if in_imports_block:
             m = re.match(r'^(\s+- )([A-Za-z][A-Za-z0-9_-]+)\s*$', line)
             if m and ':' not in m.group(2) and '/' not in m.group(2):
-                result.append(f"{m.group(1)}chemdcatap:schema/{m.group(2)}\n")
+                name = m.group(2)
+                prefix = name if name in declared_prefixes else "chemdcatap"
+                result.append(f"{m.group(1)}{prefix}:schema/{name}\n")
                 continue
 
         result.append(line)
@@ -279,6 +296,7 @@ def process_file(
     convert_bare: bool,
     schema_id_old_base: str | None,
     schema_id_new_base: str | None,
+    sub_module_base: str | None = None,
 ) -> bool:
     """Apply all requested freezes to one file. Returns True if the file changed."""
     text = yaml_file.read_text(encoding="utf-8")
@@ -293,10 +311,12 @@ def process_file(
     if chemdcatap_base and chemdcatap_version:
         text = freeze_chemdcatap_prefix(text, chemdcatap_base, chemdcatap_version)
 
-    # 3. Convert bare local imports to chemdcatap:schema/ form
+    # 3. Convert bare local imports to prefixed CURIE form.
+    #    Uses each module's own declared prefix when available; falls back to
+    #    chemdcatap: for modules without an individual prefix declaration.
     #    Only safe after Phase 1 deploy (versioned URLs must already exist).
     if convert_bare and chemdcatap_base and chemdcatap_version:
-        text = convert_bare_imports_to_chemdcatap(text)
+        text = convert_bare_imports(text)
 
     # 4. Remap + version id: field
     if schema_id_old_base and schema_id_new_base and chemdcatap_version:
@@ -304,8 +324,18 @@ def process_file(
             text, schema_id_old_base, schema_id_new_base, chemdcatap_version
         )
 
-    # 5. Remap + version own-namespace prefixes
-    if schema_id_old_base and schema_id_new_base and chemdcatap_version:
+    # 5. Version own-namespace prefix declarations.
+    #    Two independent code paths:
+    #    a) --sub-module-base: versions prefixes matching the given base WITHOUT
+    #       touching id: fields. Use in production where sub-schemas have distinct
+    #       w3id paths (chemistry/entity/, chemistry/reaction/, materials/, etc.).
+    #    b) --schema-id-*: also remaps the base URL in id: fields. Use in the test
+    #       repo where id: fields must be redirected to the test GitHub Pages URL.
+    if sub_module_base and chemdcatap_version:
+        text = freeze_own_namespace_prefixes(
+            text, sub_module_base, sub_module_base, chemdcatap_version
+        )
+    elif schema_id_old_base and schema_id_new_base and chemdcatap_version:
         text = freeze_own_namespace_prefixes(
             text, schema_id_old_base, schema_id_new_base, chemdcatap_version
         )
@@ -382,6 +412,22 @@ def build_parser() -> argparse.ArgumentParser:
             "already exist at the versioned path."
         ),
     )
+    # --- sub-module prefix versioning ---
+    p.add_argument(
+        "--sub-module-base",
+        default=None,
+        help=(
+            "Base URL for versioning sub-module prefix declarations, no trailing slash. "
+            "e.g. https://w3id.org/nfdi-de/dcat-ap-plus  "
+            "Versions any indented prefix whose value starts with this base: "
+            "  name: {base}/path/  ->  name: {base}/path/{version}/  "
+            "using --chemdcatap-version as the version token. "
+            "Use in production repos where sub-schemas have individual w3id paths "
+            "(chemistry/entity/, chemistry/reaction/, materials/, etc.). "
+            "Requires --chemdcatap-version. Does NOT affect id: fields "
+            "(contrast with --schema-id-old-base which also remaps id: fields)."
+        ),
+    )
     # --- id: and own-namespace remapping ---
     p.add_argument(
         "--schema-id-old-base",
@@ -438,7 +484,14 @@ def main() -> int:
     if args.convert_bare_imports and not (args.chemdcatap_base and args.chemdcatap_version):
         print(
             "ERROR: --convert-bare-imports requires --chemdcatap-base and "
-            "--chemdcatap-version (needed to form the chemdcatap:schema/ CURIE).",
+            "--chemdcatap-version (needed to version the chemdcatap: fallback prefix).",
+            file=sys.stderr,
+        )
+        return 1
+    if args.sub_module_base and not args.chemdcatap_version:
+        print(
+            "ERROR: --sub-module-base requires --chemdcatap-version "
+            "(used as the version token for sub-module prefix versioning).",
             file=sys.stderr,
         )
         return 1
@@ -474,6 +527,7 @@ def main() -> int:
         or bool(chemdcatap_version)
         or args.convert_bare_imports
         or bool(args.schema_id_old_base)
+        or bool(args.sub_module_base)
     )
     if not has_work:
         print(
@@ -498,6 +552,7 @@ def main() -> int:
             convert_bare=args.convert_bare_imports,
             schema_id_old_base=args.schema_id_old_base,
             schema_id_new_base=args.schema_id_new_base,
+            sub_module_base=args.sub_module_base,
         ):
             changed_files.append(yaml_file.name)
 

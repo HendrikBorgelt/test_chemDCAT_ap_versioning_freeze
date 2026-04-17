@@ -308,6 +308,45 @@ jobs:
           git push origin "${BRANCH}"
 
       # -----------------------------------------------------------------------
+      # Record the freeze-validation outcome in freeze-status.json on gh-pages.
+      # Runs always so both success and failure are captured.
+      # The check-schema-compatibility workflow reads this file to populate the
+      # "Freeze validated" column in the compatibility matrix.
+      # -----------------------------------------------------------------------
+      - name: Publish freeze-status to gh-pages
+        if: always()
+        env:
+          VERSION: ${{ github.ref_name }}
+          VALIDATED: ${{ steps.validate.outcome == 'success' }}
+        run: |
+          git fetch origin gh-pages
+          git worktree add /tmp/ghp gh-pages
+
+          python3 - <<'PYEOF'
+          import json, os, pathlib
+          from datetime import datetime, timezone
+          f = pathlib.Path("/tmp/ghp/freeze-status.json")
+          data = json.loads(f.read_text()) if f.exists() else {}
+          data[os.environ["VERSION"]] = {
+              "validated": os.environ["VALIDATED"] == "true",
+              "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }
+          f.write_text(json.dumps(data, indent=2) + "\n")
+          PYEOF
+
+          cd /tmp/ghp
+          git add freeze-status.json
+          if git diff --staged --quiet; then
+            echo "freeze-status.json unchanged — nothing to commit."
+          else
+            git commit -m "chore: update freeze status for ${VERSION} [skip ci]"
+            git push origin gh-pages
+            echo "Pushed updated freeze-status.json."
+          fi
+          cd -
+          git worktree remove /tmp/ghp
+
+      # -----------------------------------------------------------------------
       # Notify maintainers when validation fails.
       # -----------------------------------------------------------------------
       - name: Open issue on validation failure
